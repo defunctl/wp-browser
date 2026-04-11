@@ -6,6 +6,7 @@ use lucatume\WPBrowser\Utils\MonkeyPatch;
 use lucatume\WPBrowser\Utils\Property;
 use lucatume\WPBrowser\WordPress\Database\DatabaseInterface;
 use lucatume\WPBrowser\WordPress\Database\MysqlDatabase;
+use WP_Error;
 
 class LoadSandbox
 {
@@ -15,6 +16,7 @@ class LoadSandbox
      */
     private array $redirects = [];
     private string $bufferedOutput = '';
+    private ?string $allowlistHost = null;
 
     public function __construct(string $wpRootDir, private string $domain)
     {
@@ -27,9 +29,12 @@ class LoadSandbox
     public function load(?DatabaseInterface $db = null): void
     {
         $this->setUpServerVars();
+        $this->allowlistHost = strtolower((string)parse_url('//' . $this->domain, PHP_URL_HOST));
         PreloadFilters::addFilter('wp_fatal_error_handler_enabled', [$this, 'returnFalse'], 100);
         PreloadFilters::addFilter('wp_redirect', [$this, 'logRedirection'], 100, 2);
         PreloadFilters::addFilter('wp_die_handler', [$this, 'wpDieHandler']);
+        PreloadFilters::addFilter('pre_http_request', [$this, 'blockExternalHttp'], 0, 3);
+        PreloadFilters::addFilter('pre_get_ready_cron_jobs', [$this, 'disableCron'], 0);
         // Setting the `chunk_size` to `0` means the function will only be called when the output buffer is closed.
         ob_start([$this, 'obCallback'], 0);
 
@@ -57,6 +62,38 @@ class LoadSandbox
         // If this is reached, then WordPress has loaded correctly.
         remove_filter('wp_fatal_error_handler_enabled', [$this, 'returnFalse'], 100);
         remove_filter('wp_redirect', [$this, 'logRedirection'], 100);
+        remove_filter('pre_http_request', [$this, 'blockExternalHttp'], 0);
+        remove_filter('pre_get_ready_cron_jobs', [$this, 'disableCron'], 0);
+    }
+
+    /**
+     * @param array<string,mixed> $parsedArgs
+     */
+    public function blockExternalHttp(bool $preempt, array $parsedArgs, string $url): bool|WP_Error
+    {
+        $requestHost = strtolower((string)parse_url($url, PHP_URL_HOST));
+
+        if ($requestHost === '' ||
+            $requestHost === 'localhost' ||
+            $requestHost === '127.0.0.1' ||
+            $requestHost === '0.0.0.0' ||
+            $requestHost === $this->allowlistHost
+        ) {
+            return false;
+        }
+
+        return new WP_Error(
+            'wpbrowser_http_blocked',
+            "LoadSandbox blocked outbound HTTP to $requestHost"
+        );
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function disableCron(): array
+    {
+        return [];
     }
 
     protected function setUpServerVars(): void
