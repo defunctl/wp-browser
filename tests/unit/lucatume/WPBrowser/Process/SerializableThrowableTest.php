@@ -63,7 +63,19 @@ class SerializableThrowableTest extends Unit
         $serializableThrowable->colorize(false);
         $serialized = serialize($serializableThrowable);
         $unserialized = unserialize($serialized)->getThrowable(SerializableThrowable::RELATIVE_PAHTNAMES);
-        return trim(StackTraceFilter::getFilteredStackTrace($unserialized));
+        $trace = StackTraceFilter::getFilteredStackTrace($unserialized);
+        $traceString = is_string($trace) ? $trace : '';
+
+        // Strip upstream runner frames (Symfony console, codecept bin, PHPUnit).
+        // These vary across PHP/Xdebug/opcache setups and are not what this test
+        // validates — the subject is the closure pretty-print in the middle frames.
+        $lines = array_filter(
+            explode("\n", $traceString),
+            static fn (string $line): bool => !str_starts_with($line, '/vendor/')
+                && !str_starts_with($line, '/bin/'),
+        );
+
+        return trim(implode("\n", $lines));
     }
 
     /**
