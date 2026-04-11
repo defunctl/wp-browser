@@ -16,7 +16,6 @@ class LoadSandbox
      */
     private array $redirects = [];
     private string $bufferedOutput = '';
-    private ?string $allowlistHost = null;
 
     public function __construct(string $wpRootDir, private string $domain)
     {
@@ -29,7 +28,6 @@ class LoadSandbox
     public function load(?DatabaseInterface $db = null): void
     {
         $this->setUpServerVars();
-        $this->allowlistHost = strtolower((string)parse_url('//' . $this->domain, PHP_URL_HOST));
         PreloadFilters::addFilter('wp_fatal_error_handler_enabled', [$this, 'returnFalse'], 100);
         PreloadFilters::addFilter('wp_redirect', [$this, 'logRedirection'], 100, 2);
         PreloadFilters::addFilter('wp_die_handler', [$this, 'wpDieHandler']);
@@ -73,11 +71,10 @@ class LoadSandbox
     {
         $requestHost = strtolower((string)parse_url($url, PHP_URL_HOST));
 
-        if ($requestHost === '' ||
-            $requestHost === 'localhost' ||
-            $requestHost === '127.0.0.1' ||
-            $requestHost === '0.0.0.0' ||
-            $requestHost === $this->allowlistHost
+        if ($requestHost === ''
+            || $requestHost === 'localhost'
+            || $requestHost === '127.0.0.1'
+            || $requestHost === '0.0.0.0'
         ) {
             return false;
         }
