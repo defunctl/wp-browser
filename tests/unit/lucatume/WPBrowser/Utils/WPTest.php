@@ -8,6 +8,9 @@ use PDO;
 use RuntimeException;
 use wpdb;
 
+/**
+ * @group fast
+ */
 class wpTest extends Unit
 {
     private function makeMockWpdbWithTables(array $tables): array

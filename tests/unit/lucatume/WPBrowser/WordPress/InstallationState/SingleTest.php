@@ -17,7 +17,6 @@ use lucatume\WPBrowser\WordPress\Installation;
 use lucatume\WPBrowser\WordPress\InstallationException;
 
 /**
- * @group slow
  */
 class SingleTest extends Unit
 {
@@ -28,6 +27,7 @@ class SingleTest extends Unit
      * It should throw when building on non existing root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_when_building_on_non_existing_root_directory(): void
     {
@@ -47,6 +47,7 @@ class SingleTest extends Unit
      * It should throw if specified wp-config.php file is not found
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_specified_wp_config_php_file_is_not_found(): void
     {
@@ -77,6 +78,7 @@ class SingleTest extends Unit
      * It should throw if built on root directory missing wp-load.php file
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_built_on_root_directory_missing_wp_load_php_file(): void
     {
@@ -107,6 +109,7 @@ class SingleTest extends Unit
      * It should throw if installation configured but not installed
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_installation_configured_but_not_installed(): void
     {
@@ -128,6 +131,7 @@ class SingleTest extends Unit
      * It should throw if building on installed and configured multisite installation
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_building_on_installed_and_configured_multisite_installation(): void
     {
@@ -158,6 +162,7 @@ class SingleTest extends Unit
      * It should throw if trying to install again
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_trying_to_install_again(): void
     {
@@ -193,6 +198,7 @@ class SingleTest extends Unit
      * It should throw if trying to scaffold
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_trying_to_scaffold(): void
     {
@@ -222,6 +228,7 @@ class SingleTest extends Unit
      * It should throw if wp-config.php file contents cannot be read during multsite conversion
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_wp_config_php_file_contents_cannot_be_read_during_multsite_conversion(): void
     {
@@ -253,6 +260,7 @@ class SingleTest extends Unit
      * It should throw if the placeholder is not found in the wp-config.php file during multisite conversion
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_the_placeholder_is_not_found_in_the_wp_config_php_file_during_multisite_conversion(
     ): void
@@ -292,6 +300,7 @@ class SingleTest extends Unit
      * It should throw if wp-config.php file cannot be written during multisite conversion
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_wp_config_php_file_cannot_be_written_during_multisite_conversion(): void
     {
@@ -325,6 +334,7 @@ class SingleTest extends Unit
      * It should allow converting the installation to multisite subdir installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_converting_the_installation_to_multisite_subdir_installation(): void
     {
@@ -353,6 +363,7 @@ class SingleTest extends Unit
      * It should allow converting the installation to multisite subdomain installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_converting_the_installation_to_multisite_subdomain_installation(): void
     {
@@ -381,6 +392,7 @@ class SingleTest extends Unit
      * It should allow getting information about the installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_information_about_the_installation(): void
     {
@@ -431,6 +443,7 @@ class SingleTest extends Unit
      * It should allow getting the db
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_the_db(): void
     {
@@ -459,6 +472,7 @@ class SingleTest extends Unit
      * It should allow getting the site constants
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_the_site_constants(): void
     {
@@ -506,6 +520,7 @@ class SingleTest extends Unit
      * It should allow getting the site globals
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_the_site_globals(): void
     {
@@ -538,6 +553,7 @@ class SingleTest extends Unit
      * It should return plugins directory
      *
      * @test
+     * @group slow
      */
     public function should_return_plugins_directory(): void
     {
@@ -565,6 +581,7 @@ class SingleTest extends Unit
      * It should return plugins directory built from WP_CONTENT_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_plugins_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -594,6 +611,7 @@ class SingleTest extends Unit
      * It should return plugins directory built from WP_PLUGIN_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_plugins_directory_built_from_wp_plugin_dir_if_set(): void
     {
@@ -625,6 +643,7 @@ class SingleTest extends Unit
      * It should return mu-plugins directory
      *
      * @test
+     * @group slow
      */
     public function should_return_mu_plugins_directory(): void
     {
@@ -652,6 +671,7 @@ class SingleTest extends Unit
      * It should return mu-plugins directory built from WP_CONTENT_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_mu_plugins_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -681,6 +701,7 @@ class SingleTest extends Unit
      * It should return mu-plugins directory built from WP_PLUGIN_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_mu_plugins_directory_built_from_wp_plugin_dir_if_set(): void
     {
@@ -712,6 +733,7 @@ class SingleTest extends Unit
      * It should return the themes directory
      *
      * @test
+     * @group slow
      */
     public function should_return_the_themes_directory(): void
     {
@@ -742,6 +764,7 @@ class SingleTest extends Unit
      * It should return the themes directory built from WP_CONTENT_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_the_themes_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -773,6 +796,7 @@ class SingleTest extends Unit
      * It should return content directory
      *
      * @test
+     * @group slow
      */
     public function should_return_content_directory(): void
     {
@@ -803,6 +827,7 @@ class SingleTest extends Unit
      * It should return content directory built from WP_CONTENT_DIR if set
      *
      * @test
+     * @group slow
      */
     public function should_return_content_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -834,6 +859,7 @@ class SingleTest extends Unit
      * It should allow working with options
      *
      * @test
+     * @group slow
      */
     public function should_allow_working_with_options(): void
     {
@@ -862,6 +888,7 @@ class SingleTest extends Unit
      * It should throw if siteurl cannot be fetched in constructor
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_siteurl_cannot_be_fetched_in_constructor(): void
     {
@@ -893,6 +920,7 @@ class SingleTest extends Unit
      * It should throw if no admin user can be found while converting to multisite
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_no_admin_user_can_be_found_while_converting_to_multisite(): void
     {
@@ -925,6 +953,7 @@ class SingleTest extends Unit
      * It should throw if siteurl cannot be found while converting to multisite
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_siteurl_cannot_be_found_while_converting_to_multisite(): void
     {
@@ -950,6 +979,7 @@ class SingleTest extends Unit
      * It should throw if trying to execute non static Closure in WordPress
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_trying_to_execute_non_static_closure_in_word_press(): void
     {
@@ -982,6 +1012,7 @@ class SingleTest extends Unit
      * It should allow executing a Closure in WordPress
      *
      * @test
+     * @group slow
      */
     public function should_allow_executing_a_closure_in_word_press(): void
     {
@@ -1012,6 +1043,7 @@ class SingleTest extends Unit
      * It should allow setting the db
      *
      * @test
+     * @group slow
      */
     public function should_allow_setting_the_db(): void
     {

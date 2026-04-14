@@ -15,7 +15,6 @@ use lucatume\WPBrowser\WordPress\InstallationState\InstallationStateInterface;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
- * @group slow
  */
 class WpbrowserTest extends \Codeception\Test\Unit
 {
@@ -63,6 +62,7 @@ EOT;
      * It should scaffold for plugin with plugin.php file
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_plugin_with_plugin_php_file(): void
     {
@@ -130,6 +130,7 @@ EOT;
      * It should scaffold for plugin with non plugin.php file
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_plugin_with_non_plugin_php_file(): void
     {
@@ -310,6 +311,7 @@ EOT;
      * It should scaffold for theme correctly
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_theme_correctly(): void
     {
@@ -384,6 +386,7 @@ EOT;
      * It should scaffold for child theme correctly
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_child_theme_correctly(): void
     {
@@ -535,6 +538,7 @@ EOT,
      * It should scaffold for single site correctly
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_single_site_correctly(): void
     {
@@ -616,6 +620,7 @@ EOT;
      * It should scaffold for multi-site correctly
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_for_multi_site_correctly(): void
     {
@@ -697,6 +702,7 @@ EOT;
      * It should scaffold correctly on site with non default structure
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_correctly_on_site_with_non_default_structure(): void
     {
@@ -743,6 +749,7 @@ EOT;
      * It should scaffold correctly on site with non default structure using default configuration
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_correctly_on_site_with_non_default_structure_using_default_configuration(): void
     {

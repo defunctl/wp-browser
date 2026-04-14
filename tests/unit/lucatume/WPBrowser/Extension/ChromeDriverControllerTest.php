@@ -15,6 +15,9 @@ use lucatume\WPBrowser\Utils\Composer;
 use stdClass;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
+/**
+ * @group fast
+ */
 class ChromeDriverControllerTest extends Unit
 {
     use UopzFunctions;

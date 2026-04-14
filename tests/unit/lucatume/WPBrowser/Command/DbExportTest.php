@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use \UnitTester;
 
 /**
- * @group slow
  */
 class DbExportTest extends \Codeception\Test\Unit
 {
@@ -29,6 +28,7 @@ class DbExportTest extends \Codeception\Test\Unit
      * It should throw if path does not point to installation directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_path_does_not_point_to_installation_directory(): void
     {
@@ -48,6 +48,7 @@ class DbExportTest extends \Codeception\Test\Unit
      * It should throw if dump dir does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_dump_dir_does_not_exist(): void
     {
@@ -68,6 +69,7 @@ class DbExportTest extends \Codeception\Test\Unit
      * It should throw if installation db cannot be found
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_installation_db_cannot_be_found(): void
     {
@@ -94,6 +96,7 @@ class DbExportTest extends \Codeception\Test\Unit
      * It should correctly dump db
      *
      * @test
+     * @group slow
      */
     public function should_correctly_dump_db(): void
     {
@@ -127,6 +130,7 @@ class DbExportTest extends \Codeception\Test\Unit
      * It should correctly dump sqlite db
      *
      * @test
+     * @group slow
      */
     public function should_correctly_dump_sqlite_db(): void
     {

@@ -43,7 +43,6 @@ use const ABSPATH;
 use const WP_DEBUG;
 
 /**
- * @group slow
  * @group isolated-1
  */
 class WPLoaderTest extends Unit
@@ -136,6 +135,7 @@ class WPLoaderTest extends Unit
      * It should throw if cannot connect to the database
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_cannot_connect_to_the_database(): void
     {
@@ -166,6 +166,7 @@ class WPLoaderTest extends Unit
      * It should throw if wpRootFolder is not valid
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_wp_root_folder_is_not_valid(): void
     {
@@ -187,6 +188,7 @@ class WPLoaderTest extends Unit
      * It should allow specifying the wpRootFolder as a relative path to cwd or abspath
      *
      * @test
+     * @group slow
      */
     public function should_allow_specifying_the_wp_root_folder_as_a_relative_path_to_cwd_or_abspath(): void
     {
@@ -231,6 +233,7 @@ class WPLoaderTest extends Unit
      * It should allow specifying the wpRootFolder including the home symbol
      *
      * @test
+     * @group slow
      */
     public function should_allow_specifying_the_wp_root_folder_including_the_home_symbol(): void
     {
@@ -261,6 +264,7 @@ class WPLoaderTest extends Unit
      * It should allow specifying the wpRootFolder as an absolute path
      *
      * @test
+     * @group slow
      */
     public function should_allow_specifying_the_wp_root_folder_as_an_absolute_path(): void
     {
@@ -288,6 +292,7 @@ class WPLoaderTest extends Unit
      * It should allow specifying the wpRootFolder as absolute path with escaped spaces
      *
      * @test
+     * @group slow
      */
     public function should_allow_specifying_the_wp_root_folder_as_absolute_path_with_escaped_spaces(): void
     {
@@ -315,6 +320,7 @@ class WPLoaderTest extends Unit
      * It should scaffold the installation if the wpRootFolder is empty
      *
      * @test
+     * @group slow
      */
     public function should_scaffold_the_installation_if_the_wp_root_folder_is_empty(): void
     {
@@ -340,6 +346,7 @@ class WPLoaderTest extends Unit
      * It should read salts from configured installation
      *
      * @test
+     * @group slow
      */
     public function should_read_salts_from_configured_installation(): void
     {
@@ -380,6 +387,7 @@ class WPLoaderTest extends Unit
      * It should allow getting paths from the wpRootFolder
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_paths_from_the_wp_root_folder(): void
     {
@@ -407,6 +415,7 @@ class WPLoaderTest extends Unit
      * It should set some default values for salt keys
      *
      * @test
+     * @group slow
      */
     public function should_set_some_default_values_for_salt_keys(): void
     {
@@ -447,6 +456,7 @@ class WPLoaderTest extends Unit
      * It should load config files if set
      *
      * @test
+     * @group slow
      */
     public function should_load_config_files_if_set(): void
     {
@@ -493,6 +503,7 @@ class WPLoaderTest extends Unit
      * It should throw if configFiles do not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_config_files_do_not_exist(): void
     {
@@ -544,6 +555,7 @@ class WPLoaderTest extends Unit
      * It should throw if loadOnly and installation empty
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_load_only_and_installation_empty(): void
     {
@@ -571,6 +583,7 @@ class WPLoaderTest extends Unit
      * It should throw if loadOnly and installation scaffolded
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_load_only_and_installation_scaffolded(): void
     {
@@ -599,6 +612,7 @@ class WPLoaderTest extends Unit
      * It should throw if loadOnly and domain empty
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_load_only_and_domain_empty(): void
     {
@@ -630,6 +644,7 @@ class WPLoaderTest extends Unit
      * It should throw if loadOnly and WordPress not installed
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_load_only_and_word_press_not_installed(): void
     {
@@ -666,6 +681,7 @@ class WPLoaderTest extends Unit
      * It should load WordPress before suite if loadOnly w/ config files
      *
      * @test
+     * @group slow
      */
     public function should_load_word_press_before_suite_if_load_only_w_config_files(): void
     {
@@ -727,6 +743,7 @@ class WPLoaderTest extends Unit
      * It should create the database if it does not exist
      *
      * @test
+     * @group slow
      */
     public function should_create_the_database_if_it_does_not_exist(): void
     {
@@ -763,6 +780,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @dataProvider dbModuleCompatDataProvider
+     * @group slow
      */
     public function should_not_throw_when_load_only_true_and_using_db_module(
         string $dbModuleName,
@@ -812,6 +830,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @dataProvider dbModuleCompatDataProvider
+     * @group slow
      */
     public function should_throw_if_using_with_wp_db_and_not_load_only(
         string $dbModuleName,
@@ -850,6 +869,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @dataProvider dbModuleCompatDataProvider
+     * @group slow
      */
     public function should_not_throw_if_using_db_module_and_load_only_true(
         string $dbModuleName,
@@ -888,6 +908,7 @@ class WPLoaderTest extends Unit
      * It should throw if configFile not found
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_config_file_not_found(): void
     {
@@ -919,6 +940,7 @@ class WPLoaderTest extends Unit
      * It should install and bootstrap single site using constants' names
      *
      * @test
+     * @group slow
      */
     public function should_should_install_and_bootstrap_single_site_using_constants_names(): void
     {
@@ -956,6 +978,7 @@ class WPLoaderTest extends Unit
      * It should throw module exception on error during bootstrap
      *
      * @test
+     * @group slow
      */
     public function should_throw_module_exception_on_error_during_bootstrap(): void
     {
@@ -988,6 +1011,7 @@ class WPLoaderTest extends Unit
      * It should install and bootstrap single installation
      *
      * @test
+     * @group slow
      */
     public function should_install_and_bootstrap_single_installation(): void
     {
@@ -1078,6 +1102,7 @@ class WPLoaderTest extends Unit
      * It should install and bootstrap multisite installation
      *
      * @test
+     * @group slow
      */
     public function should_install_and_bootstrap_multisite_installation(): void
     {
@@ -1183,6 +1208,7 @@ class WPLoaderTest extends Unit
      * It should throw if there is an error while activating a plugin
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_there_is_an_error_while_activating_a_plugin(): void
     {
@@ -1222,6 +1248,7 @@ class WPLoaderTest extends Unit
      * It should throw if there is an error while activating a plugin in multisite
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_there_is_an_error_while_activating_a_plugin_in_multisite(): void
     {
@@ -1262,6 +1289,7 @@ class WPLoaderTest extends Unit
      * It should throw if there is an error while switching theme
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_there_is_an_error_while_switching_theme(): void
     {
@@ -1297,6 +1325,7 @@ class WPLoaderTest extends Unit
      * It should throw if there is an error while switching theme in multisite
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_there_is_an_error_while_switching_theme_in_multisite(): void
     {
@@ -1333,6 +1362,7 @@ class WPLoaderTest extends Unit
      * It should correctly activate child theme in single installation
      *
      * @test
+     * @group slow
      */
     public function should_correctly_activate_child_theme_in_single_installation(): void
     {
@@ -1400,6 +1430,7 @@ class WPLoaderTest extends Unit
      * It should correctly activate child theme in multisite installation
      *
      * @test
+     * @group slow
      */
     public function should_correctly_activate_child_theme_in_multisite_installation(): void
     {
@@ -1468,6 +1499,7 @@ class WPLoaderTest extends Unit
      * It should throw if specified dump file does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_specified_dump_file_does_not_exist(): void
     {
@@ -1496,6 +1528,7 @@ class WPLoaderTest extends Unit
      * It should throw if any dump file specified does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_any_dump_file_specified_does_not_exist(): void
     {
@@ -1528,6 +1561,7 @@ class WPLoaderTest extends Unit
      * It should rethrow on failure to load a dump file
      *
      * @test
+     * @group slow
      */
     public function should_rethrow_on_failure_to_load_a_dump_file(): void
     {
@@ -1566,6 +1600,7 @@ class WPLoaderTest extends Unit
      * It should allow loading a database dump before tests
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_a_database_dump_before_tests(): void
     {
@@ -1597,6 +1632,7 @@ class WPLoaderTest extends Unit
      * It should allow loading multiple database dumps before the tests
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_multiple_database_dumps_before_the_tests(): void
     {
@@ -1634,6 +1670,7 @@ class WPLoaderTest extends Unit
      * It should support using dbUrl to set up module
      *
      * @test
+     * @group slow
      */
     public function should_support_using_db_url_to_set_up_module(): void
     {
@@ -1656,6 +1693,7 @@ class WPLoaderTest extends Unit
      * It should throw if dbUrl not set and db credentials are not provided
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_db_url_not_set_and_db_credentials_are_not_provided(): void
     {
@@ -1676,6 +1714,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group sqlite
+     * @group slow
      */
     public function should_place_sq_lite_dropin_if_using_sq_lite_database_for_tests(): void
     {
@@ -1701,6 +1740,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group sqlite
+     * @group slow
      */
     public function should_initialize_correctly_with_sqlite_database(): void
     {
@@ -1729,6 +1769,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group sqlite
+     * @group slow
      */
     public function should_initialize_correctly_with_sqlite_database_in_load_only_mode(): void
     {
@@ -1766,6 +1807,7 @@ class WPLoaderTest extends Unit
      * It should correctly load the module on a Bedrock installation
      *
      * @test
+     * @group slow
      */
     public function should_correctly_load_the_module_on_a_bedrock_installation(): void
     {
@@ -1856,6 +1898,7 @@ PHP
      *
      * @test
      * @dataProvider differentDbNamesProvider
+     * @group slow
      */
     public function should_correctly_load_with_different_database_names(string $dbName): void
     {
@@ -1899,6 +1942,7 @@ PHP
      *
      * @test
      * @group backup-globals
+     * @group slow
      */
     public function should_not_backup_globals_by_default(): void
     {
@@ -1962,6 +2006,7 @@ PHP
      *
      * @test
      * @group backup-globals
+     * @group slow
      */
     public function should_allow_controlling_the_backup_of_global_variables_in_the_wp_test_case(): void
     {
@@ -2208,6 +2253,7 @@ PHP
      *
      * @test
      * @group backup-globals
+     * @group slow
      */
     public function should_allow_controlling_the_backup_of_static_attributes_in_the_wp_test_case(): void
     {
@@ -2548,6 +2594,7 @@ PHP
      * It should skip installation when skipInstall is true
      *
      * @test
+     * @group slow
      */
     public function should_skip_installation_when_skip_install_is_true(): void
     {
@@ -2746,6 +2793,7 @@ PHP
      * It should fail to activate when plugins generate unexpected output
      *
      * @test
+     * @group slow
      */
     public function should_fail_to_activate_when_plugins_generate_unexpected_output(): void
     {
@@ -2801,6 +2849,7 @@ PHP
      * It should allow activating plugins silently
      *
      * @test
+     * @group slow
      */
     public function should_allow_activating_plugins_silently(): void
     {

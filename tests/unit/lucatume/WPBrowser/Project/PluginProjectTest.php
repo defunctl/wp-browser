@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\NullOutput;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
- * @group slow
  */
 class PluginProjectTest extends Unit
 {
@@ -32,6 +31,7 @@ class PluginProjectTest extends Unit
      * It should throw if built on non existing directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_built_on_non_existing_directory(): void
     {
@@ -48,6 +48,7 @@ class PluginProjectTest extends Unit
      * It should throw if directory found but not a plugin
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_directory_found_but_not_a_plugin(): void
     {
@@ -65,6 +66,7 @@ class PluginProjectTest extends Unit
      * It should build on plugin directory correctly
      *
      * @test
+     * @group fast
      */
     public function should_build_on_plugin_directory_correctly(): void
     {
@@ -84,6 +86,7 @@ class PluginProjectTest extends Unit
      * It should provide information about the failure to activate due to error
      *
      * @test
+     * @group slow
      */
     public function should_provide_information_about_the_failure_to_activate_due_to_error(): void
     {

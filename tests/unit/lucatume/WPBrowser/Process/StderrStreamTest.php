@@ -17,6 +17,9 @@ use lucatume\WPBrowser\WordPress\InstallationException;
 use ParseError;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
+/**
+ * @group fast
+ */
 class StderrStreamTest extends Unit
 {
     use SnapshotAssertions;

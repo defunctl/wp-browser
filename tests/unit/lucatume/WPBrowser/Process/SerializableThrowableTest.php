@@ -11,6 +11,9 @@ use RuntimeException;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 use Throwable;
 
+/**
+ * @group fast
+ */
 class SerializableThrowableTest extends Unit
 {
     use SnapshotAssertions;

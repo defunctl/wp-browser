@@ -19,7 +19,6 @@ use lucatume\WPBrowser\WordPress\InstallationState\Single;
 use RuntimeException;
 
 /**
- * @group slow
  */
 class InstallationTest extends Unit
 {
@@ -31,6 +30,7 @@ class InstallationTest extends Unit
      * It should throw when building on non-existing root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_when_building_on_non_existing_root_directory(): void
     {
@@ -44,6 +44,7 @@ class InstallationTest extends Unit
      * It should throw when building on non-writable root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_when_building_on_non_writable_root_directory(): void
     {
@@ -63,6 +64,7 @@ class InstallationTest extends Unit
      * It should throw when building on non-readable root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_when_building_on_non_readable_root_directory()
     {
@@ -82,6 +84,7 @@ class InstallationTest extends Unit
      * It should identify empty installation correctly
      *
      * @test
+     * @group fast
      */
     public function should_identify_empty_installation_correctly()
     {
@@ -176,6 +179,7 @@ class InstallationTest extends Unit
      * It should allow getting the wp-config.php file path
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_the_wp_config_php_file_path(): void
     {
@@ -195,6 +199,7 @@ class InstallationTest extends Unit
      * It should allow getting the wp-config.php file path when placed out of root
      *
      * @test
+     * @group slow
      */
     public function should_allow_getting_the_wp_config_php_file_path_when_placed_out_of_root(): void
     {
@@ -243,6 +248,7 @@ class InstallationTest extends Unit
      * It should allow running wp-cli command on scaffolded installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_running_wp_cli_command_on_scaffolded_installation(): void
     {
@@ -259,6 +265,7 @@ class InstallationTest extends Unit
      * It should allow running wp-cli command on configured installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_running_wp_cli_command_on_configured_installation(): void
     {
@@ -282,6 +289,7 @@ class InstallationTest extends Unit
      * It should allow running wp-cli command on single installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_running_wp_cli_command_on_single_installation(): void
     {
@@ -309,6 +317,7 @@ class InstallationTest extends Unit
      * It should allow running wp-cli command on multisite installation
      *
      * @test
+     * @group slow
      */
     public function should_allow_running_wp_cli_command_on_multisite_installation(): void
     {
@@ -337,6 +346,7 @@ class InstallationTest extends Unit
      * It should support SQLite database during configuration
      *
      * @test
+     * @group slow
      */
     public function should_support_sq_lite_database_during_configuration(): void
     {
@@ -358,6 +368,7 @@ class InstallationTest extends Unit
      * It should support SQLite in single installation
      *
      * @test
+     * @group slow
      */
     public function should_support_sq_lite_in_single_installation(): void
     {
@@ -382,6 +393,7 @@ class InstallationTest extends Unit
      * It should support sqlite in multisite subdomain installation
      *
      * @test
+     * @group slow
      */
     public function should_support_sqlite_in_multisite_subdomain_installation(): void
     {
@@ -406,6 +418,7 @@ class InstallationTest extends Unit
      * It should support sqlite in multisite subfolder installation
      *
      * @test
+     * @group slow
      */
     public function should_support_sqlite_in_multisite_subfolder_installation(): void
     {
@@ -430,6 +443,7 @@ class InstallationTest extends Unit
      * It should support wp-cli commands when using sqlite
      *
      * @test
+     * @group slow
      */
     public function should_support_wp_cli_commands_when_using_sqlite(): void
     {
@@ -452,6 +466,7 @@ class InstallationTest extends Unit
      * It should support complex plugin load in sqlite context
      *
      * @test
+     * @group slow
      */
     public function should_support_complex_plugin_load_in_sqlite_context(): void
     {
@@ -480,6 +495,7 @@ class InstallationTest extends Unit
      * It should throw if changing db from MySQL to SQLite but db dropin not found
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_changing_db_from_my_sql_to_sq_lite_but_db_dropin_not_found(): void
     {
@@ -518,6 +534,7 @@ class InstallationTest extends Unit
      * It should throw if trying to place SQLite plugin but db dropin already there
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_trying_to_place_sq_lite_plugin_but_db_dropin_already_there(): void
     {
@@ -545,6 +562,7 @@ PHP;
      * It should allow placing SQLite plugin multiple times
      *
      * @test
+     * @group slow
      */
     public function should_allow_placing_sq_lite_plugin_multiple_times(): void
     {
@@ -562,6 +580,7 @@ PHP;
      * It should be possible to change an installation database from mysql to sqlite
      *
      * @test
+     * @group slow
      */
     public function should_be_possible_to_change_an_installation_database_from_mysql_to_sqlite(): void
     {
@@ -612,6 +631,7 @@ PHP;
      * It should allow building installation without checking db
      *
      * @test
+     * @group slow
      */
     public function should_allow_building_installation_without_checking_db(): void
     {
@@ -634,6 +654,7 @@ PHP;
      * It should throw if WordPress installation cannot be found in directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_word_press_installation_cannot_be_found_in_directory(): void
     {

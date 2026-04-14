@@ -9,6 +9,9 @@ use lucatume\WPBrowser\Traits\UopzFunctions;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
+/**
+ * @group fast
+ */
 class ResponseTest extends TestCase
 {
     use UopzFunctions;

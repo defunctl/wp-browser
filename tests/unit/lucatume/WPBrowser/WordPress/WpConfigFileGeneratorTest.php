@@ -12,7 +12,6 @@ use lucatume\WPBrowser\WordPress\Database\SQLiteDatabase;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
- * @group slow
  */
 class WpConfigFileGeneratorTest extends Unit
 {
@@ -24,6 +23,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should throw if building on non existing root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_building_on_non_existing_root_directory(): void
     {
@@ -37,6 +37,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should throw if wp-config-sample.php file not found in root directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_wp_config_sample_php_file_not_found_in_root_directory(): void
     {
@@ -54,6 +55,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should throw if wp-config-sample.php file cannot be read
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_wp_config_sample_php_file_cannot_be_read(): void
     {
@@ -75,6 +77,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should correctly produce a wp-config.php file contents provided db and configuration data
      *
      * @test
+     * @group slow
      */
     public function should_correctly_produce_a_wp_config_php_file_contents_provided_db_and_configuration_data(): void
     {
@@ -105,6 +108,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should correctly produce a wp-config.php file with custom constants
      *
      * @test
+     * @group slow
      */
     public function should_correctly_produce_a_wp_config_php_file_with_custom_constants(): void
     {
@@ -141,6 +145,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should throw if specified relativePathRoot does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_specified_relative_path_root_does_not_exist(): void
     {
@@ -158,6 +163,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should correctly produce wp-config.php file with SQLite database
      *
      * @test
+     * @group slow
      */
     public function should_correctly_produce_wp_config_php_file_with_sq_lite_database(): void
     {
@@ -185,6 +191,7 @@ class WpConfigFileGeneratorTest extends Unit
      * It should correctly produce wp-config.php file with SQLite database when db path specified
      *
      * @test
+     * @group slow
      */
     public function should_correctly_produce_wp_config_php_file_with_sq_lite_database_when_db_path_specified(): void
     {

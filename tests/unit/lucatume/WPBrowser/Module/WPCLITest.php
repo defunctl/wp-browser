@@ -19,7 +19,6 @@ use stdClass;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
- * @group slow
  */
 class WPCLITest extends Unit
 {
@@ -95,6 +94,7 @@ class WPCLITest extends Unit
      * It should throw if path does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_path_does_not_exist(): void
     {
@@ -116,6 +116,7 @@ class WPCLITest extends Unit
      *
      * @test
      * @dataProvider notPositiveIntegerTimeoutValues
+     * @group fast
      */
     public function should_throw_if_timeout_value_is_not_positive_integer($timeoutValue): void
     {
@@ -142,6 +143,7 @@ class WPCLITest extends Unit
      *
      * @test
      * @dataProvider stringConfigKeysProvider
+     * @group fast
      */
     public function should_throw_if_expected_string_keys_are_not_string_keys(string $configKey): void
     {
@@ -157,6 +159,7 @@ class WPCLITest extends Unit
      * It should allow running wp-cli array commands
      *
      * @test
+     * @group slow
      */
     public function should_allow_running_wp_cli_array_commands(): void
     {
@@ -175,6 +178,7 @@ class WPCLITest extends Unit
      * It should throw if trying to grab last shell output before running command
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_grab_last_shell_output_before_running_command(): void
     {
@@ -191,6 +195,7 @@ class WPCLITest extends Unit
      * It should throw if trying to grab last shell error output before running command
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_grab_last_shell_error_output_before_running_command(): void
     {
@@ -207,6 +212,7 @@ class WPCLITest extends Unit
      * It should throw if trying to seeResultCodeIs before any command ran
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_see_result_code_is_before_any_command_ran(): void
     {
@@ -223,6 +229,7 @@ class WPCLITest extends Unit
      * It should throw if trying to seeResultCodeIsNot before any command ran
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_see_result_code_is_not_before_any_command_ran(): void
     {
@@ -239,6 +246,7 @@ class WPCLITest extends Unit
      * It should throw if throw configuration parameter is true and command fails
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_throw_configuration_parameter_is_true_and_command_fails(): void
     {
@@ -322,6 +330,7 @@ class WPCLITest extends Unit
      * It should throw if trying to grab last wp-cli process before any ran
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_grab_last_wp_cli_process_before_any_ran(): void
     {
@@ -549,6 +558,7 @@ class WPCLITest extends Unit
      * It should throw if exec configuration parameter is not an array
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_exec_configuration_parameter_is_not_an_array(): void
     {
@@ -564,6 +574,7 @@ class WPCLITest extends Unit
      * It should throw if require configuration parameter is not an array
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_require_configuration_parameter_is_not_an_array(): void
     {
@@ -579,6 +590,7 @@ class WPCLITest extends Unit
      * It should throw if exec configuration parameter is not an array of strings
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_exec_configuration_parameter_is_not_an_array_of_strings(): void
     {
@@ -594,6 +606,7 @@ class WPCLITest extends Unit
      * It should throw if require configuration parameter is not an array of strings
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_require_configuration_parameter_is_not_an_array_of_strings(): void
     {
@@ -744,6 +757,7 @@ class WPCLITest extends Unit
      * It should throw if context configuration parameter is not a string
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_context_configuration_parameter_is_not_a_string(): void
     {
@@ -1103,6 +1117,7 @@ class WPCLITest extends Unit
      * It should allow changing the path used by WPCLI
      *
      * @test
+     * @group slow
      */
     public function should_allow_changing_the_path_used_by_wpcli(): void
     {

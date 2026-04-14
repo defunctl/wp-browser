@@ -17,7 +17,6 @@ use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
- * @group slow
  */
 class DbImportTest extends \Codeception\Test\Unit
 {
@@ -27,6 +26,7 @@ class DbImportTest extends \Codeception\Test\Unit
      * It should throw if path does not point to installation directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_path_does_not_point_to_installation_directory(): void
     {
@@ -46,6 +46,7 @@ class DbImportTest extends \Codeception\Test\Unit
      * It should throw if dump file does not exist
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_dump_file_does_not_exist(): void
     {
@@ -66,6 +67,7 @@ class DbImportTest extends \Codeception\Test\Unit
      * It should throw if installation db cannot be found
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_installation_db_cannot_be_found(): void
     {
@@ -92,6 +94,7 @@ class DbImportTest extends \Codeception\Test\Unit
      * It should correctly import db
      *
      * @test
+     * @group slow
      */
     public function should_correctly_import_db(): void
     {
@@ -131,6 +134,7 @@ class DbImportTest extends \Codeception\Test\Unit
      * It should correctly import sqlite db
      *
      * @test
+     * @group slow
      */
     public function should_correctly_import_sqlite_db(): void
     {

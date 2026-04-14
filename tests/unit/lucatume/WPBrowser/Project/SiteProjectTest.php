@@ -20,6 +20,7 @@ class SiteProjectTest extends \Codeception\Test\Unit
      * It should throw if trying scaffold on site that is empty
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_scaffold_on_site_that_is_empty(): void
     {
@@ -46,6 +47,7 @@ EOT;
      * It should throw if trying to scaffold on site that is not configured
      *
      * @test
+     * @group slow
      */
     public function should_throw_if_trying_to_scaffold_on_site_that_is_not_configured(): void
     {

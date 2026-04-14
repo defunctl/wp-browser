@@ -19,6 +19,9 @@ use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 // @group slow
 // @group isolated-2
+/**
+ * @group slow
+ */
 class WPLoaderArbitraryPluginLocationTest extends Unit
 {
     use SnapshotAssertions;

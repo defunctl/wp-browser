@@ -55,6 +55,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      * It should allow loading theme from arbitrary location
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_theme_from_arbitrary_location(): void
     {
@@ -248,6 +249,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      * It should allow loading theme from arbitrary location in multisite
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_theme_from_arbitrary_location_in_multisite(): void
     {
@@ -452,6 +454,7 @@ public function invalidThemeConfigurationDataProvider(): array
      *
      * @test
      * @dataProvider invalidThemeConfigurationDataProvider
+     * @group fast
      */
     public function should_throw_if_theme_parameter_configured_with_not_an_array_of_two_strings($theme): void
     {
@@ -472,6 +475,7 @@ public function invalidThemeConfigurationDataProvider(): array
      * It should allow loading parent and child theme from arbitrary paths
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths(): void
     {
@@ -613,6 +617,7 @@ public function invalidThemeConfigurationDataProvider(): array
      * It should allow loading parent and child theme from arbitrary paths in multisite
      *
      * @test
+     * @group slow
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths_in_multisite(): void
     {

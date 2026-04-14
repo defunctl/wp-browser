@@ -92,6 +92,7 @@ class BuiltInServerControllerTest extends Unit
      *
      * @test
      * @dataProvider notArrayOfStringsProvider
+     * @group fast
      */
     public function should_throw_if_suite_configuration_parameter_is_not_array_of_strings(mixed $suites): void
     {
@@ -124,6 +125,7 @@ class BuiltInServerControllerTest extends Unit
      *
      * @test
      * @dataProvider notIntGreaterThanZeroProvider
+     * @group fast
      */
     public function should_throw_if_config_port_is_not_int_greater_than_0(mixed $port): void
     {
@@ -160,6 +162,7 @@ class BuiltInServerControllerTest extends Unit
      *
      * @test
      * @dataProvider notValidDirectoryProvider
+     * @group fast
      */
     public function should_throw_if_config_docroot_is_not_existing_directory(mixed $docroot): void
     {
@@ -180,6 +183,7 @@ class BuiltInServerControllerTest extends Unit
      *
      * @test
      * @dataProvider notIntGreaterThanZeroProvider
+     * @group fast
      */
     public function should_throw_if_config_workers_is_not_int_greater_than_0(mixed $workers): void
     {
@@ -218,6 +222,7 @@ class BuiltInServerControllerTest extends Unit
      *
      * @test
      * @dataProvider notAssociativeArrayWithStringsProvider
+     * @group fast
      */
     public function should_throw_if_config_env_is_not_associative_array_with_string_keys(mixed $env): void
     {
@@ -240,6 +245,7 @@ class BuiltInServerControllerTest extends Unit
      * It should replace CC root dir placeholder in env array
      *
      * @test
+     * @group fast
      */
     public function should_replace_cc_root_dir_placeholder_in_env_array(): void
     {

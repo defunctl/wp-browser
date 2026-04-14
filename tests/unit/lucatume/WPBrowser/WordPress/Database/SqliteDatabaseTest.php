@@ -18,6 +18,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if building on non existing directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_building_on_non_existing_directory(): void
     {
@@ -30,6 +31,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if building on non writable directory
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_building_on_non_writable_directory(): void
     {
@@ -43,6 +45,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should create Sqlite file when getting PDO
      *
      * @test
+     * @group fast
      */
     public function should_create_sqlite_file_when_getting_pdo(): void
     {
@@ -58,6 +61,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should build PDO only once
      *
      * @test
+     * @group fast
      */
     public function should_build_pdo_only_once(): void
     {
@@ -73,6 +77,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should create db on create
      *
      * @test
+     * @group fast
      */
     public function should_create_db_on_create(): void
     {
@@ -87,6 +92,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should return empty strings for host, user, password
      *
      * @test
+     * @group fast
      */
     public function should_return_empty_strings_for_host_user_password(): void
     {
@@ -102,6 +108,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should return the file name as db name
      *
      * @test
+     * @group fast
      */
     public function should_return_the_file_name_as_db_name(): void
     {
@@ -115,6 +122,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should delete the db file on drop
      *
      * @test
+     * @group fast
      */
     public function should_delete_the_db_file_on_drop(): void
     {
@@ -133,6 +141,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if file cannot be unlinked during drop
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_file_cannot_be_unlinked_during_drop(): void
     {
@@ -150,6 +159,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if trying to change database
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_change_database(): void
     {
@@ -164,6 +174,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should return dbURL and DSN correctly
      *
      * @test
+     * @group fast
      */
     public function should_return_db_url_and_dsn_correctly(): void
     {
@@ -178,6 +189,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should run queries correctly
      *
      * @test
+     * @group fast
      */
     public function should_run_queries_correctly(): void
     {
@@ -209,6 +221,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should allow importing Sqlite dump
      *
      * @test
+     * @group fast
      */
     public function should_allow_importing_sqlite_dump(): void
     {
@@ -229,6 +242,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if trying to import from non-existing file
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_import_from_non_existing_file(): void
     {
@@ -247,6 +261,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if trying to import import non-readable file
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_trying_to_import_import_non_readable_file(): void
     {
@@ -266,6 +281,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should allow getting the db directory and file
      *
      * @test
+     * @group fast
      */
     public function should_allow_getting_the_db_directory_and_file(): void
     {
@@ -280,6 +296,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should allow building from wp-config.file
      *
      * @test
+     * @group slow
      */
     public function should_allow_building_from_wp_config_file(): void
     {
@@ -298,6 +315,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should allow importing and exporting the database
      *
      * @test
+     * @group fast
      */
     public function should_allow_importing_and_exporting_the_database(): void
     {
@@ -331,6 +349,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
      * It should throw if database dump file cannot be written
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_database_dump_file_cannot_be_written(): void
     {
@@ -365,6 +384,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
     /**
      * @test
      * @dataProvider optionsDataProvider
+     * @group fast
      */
     public function should_read_and_write_options_correctly(mixed $optionValue, mixed $expectedOptionValue): void
     {

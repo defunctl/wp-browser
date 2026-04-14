@@ -58,6 +58,9 @@ class WPTestCaseStrictTest extends Unit
         $this->module();
     }
 
+    /**
+     * @group slow
+     */
     public function test_will_fail_if_db_connection_closed_during_setup_before_class(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
@@ -176,6 +179,7 @@ class WPTestCaseStrictTest extends Unit
      * It should not be strict about wpdb connection id in SQLite database
      *
      * @test
+     * @group slow
      */
     public function should_not_be_strict_about_wpdb_connection_id_in_sq_lite_database(): void
     {

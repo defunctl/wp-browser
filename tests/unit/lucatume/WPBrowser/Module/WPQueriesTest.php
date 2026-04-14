@@ -92,6 +92,7 @@ class WPQueriesTest extends Unit
      * It should use the globally available instance of wpdb if none provided
      *
      * @test
+     * @group fast
      */
     public function should_use_the_globally_available_instance_of_wpdb_if_none_provided(): void
     {
@@ -106,6 +107,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should define the SAVEQUERIES constant if not defined already
+     * @group fast
      */
     public function it_should_define_the_savequeries_constant_if_not_defined_already(): void
     {
@@ -123,6 +125,7 @@ class WPQueriesTest extends Unit
      * It should throw if SAVEQUERIES defined and false
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_savequeries_defined_and_false(): void
     {
@@ -140,6 +143,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should filter setUp and tearDown queries by default
+     * @group fast
      */
     public function it_should_filter_set_up_and_tear_down_queries_by_default(): void
     {
@@ -203,6 +207,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should return false if asserting queries and there were no queries
+     * @group fast
      */
     public function it_should_return_false_if_asserting_queries_and_there_were_no_queries(): void
     {
@@ -249,6 +254,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should not fail if asserting queries and there were queries
+     * @group fast
      */
     public function it_should_not_fail_if_asserting_queries_and_there_were_queries(): void
     {
@@ -281,6 +287,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should fail if asserting no queries but queries were made
+     * @group fast
      */
     public function it_should_fail_if_asserting_no_queries_but_queries_were_made(): void
     {
@@ -315,6 +322,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should succeed if asserting no queries and no queries were made
+     * @group fast
      */
     public function it_should_succeed_if_asserting_no_queries_and_no_queries_were_made(): void
     {
@@ -341,6 +349,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow counting the queries
+     * @group fast
      */
     public function it_should_allow_counting_the_queries(): void
     {
@@ -379,6 +388,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should fail if asserting wrong queries count
+     * @group fast
      */
     public function it_should_fail_if_asserting_wrong_queries_count(): void
     {
@@ -419,6 +429,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries count by statement
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_statement(): void
     {
@@ -475,6 +486,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by class method
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_class_method(): void
     {
@@ -529,6 +541,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by function
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_function(): void
     {
@@ -582,6 +595,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by class method and statement
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_class_method_and_statement(): void
     {
@@ -632,6 +646,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by function and statement
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_function_and_statement(): void
     {
@@ -682,6 +697,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by action
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_action(): void
     {
@@ -732,6 +748,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by action and statement
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_action_and_statement(): void
     {
@@ -782,6 +799,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by filter
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_filter(): void
     {
@@ -832,6 +850,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow asserting queries by filter and statement
+     * @group fast
      */
     public function it_should_allow_asserting_queries_by_filter_and_statement(): void
     {
@@ -882,6 +901,7 @@ class WPQueriesTest extends Unit
     /**
      * @test
      * it should allow using regexes when asserting queries by statement
+     * @group fast
      */
     public function it_should_allow_using_regexes_when_asserting_queries_by_statement(): void
     {
@@ -925,6 +945,7 @@ class WPQueriesTest extends Unit
      * It should allow getting the count of the queries
      *
      * @test
+     * @group fast
      */
     public function should_allow_getting_the_count_of_the_queries(): void
     {
@@ -965,6 +986,7 @@ class WPQueriesTest extends Unit
      * It should allow getting the queries
      *
      * @test
+     * @group fast
      */
     public function should_allow_getting_the_queries(): void
     {
