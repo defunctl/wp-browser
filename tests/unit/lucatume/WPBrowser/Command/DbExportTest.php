@@ -6,6 +6,7 @@ namespace lucatume\WPBrowser\Command;
 use lucatume\WPBrowser\Command\DbExport;
 use lucatume\WPBrowser\Exceptions\InvalidArgumentException;
 use lucatume\WPBrowser\Exceptions\RuntimeException;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem;
@@ -23,6 +24,7 @@ use \UnitTester;
 class DbExportTest extends \Codeception\Test\Unit
 {
     use TmpFilesCleanup;
+    use FastScaffold;
 
     /**
      * It should throw if path does not point to installation directory
@@ -53,7 +55,7 @@ class DbExportTest extends \Codeception\Test\Unit
     public function should_throw_if_dump_dir_does_not_exist(): void
     {
         $path = Filesystem::tmpDir('dbexport_');
-        Installation::scaffold($path);
+        $this->fastScaffold($path);
         $input = new StringInput("$path $path/dumps/dump.sql");
         $output = new BufferedOutput();
 
@@ -79,7 +81,7 @@ class DbExportTest extends \Codeception\Test\Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($path)
+        $this->fastScaffold($path)
             ->configure($db);
         $input = new StringInput("$path $path/dump.sql");
         $output = new BufferedOutput();
@@ -106,7 +108,7 @@ class DbExportTest extends \Codeception\Test\Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($path)
+        $this->fastScaffold($path)
             ->configure($db)
             ->install(
                 'http://wordpress.local',
@@ -136,7 +138,7 @@ class DbExportTest extends \Codeception\Test\Unit
     {
         $path = Filesystem::tmpDir('dbexport_');
         $db = new SQLiteDatabase($path, 'db.sqlite');
-        Installation::scaffold($path)
+        $this->fastScaffold($path)
             ->configure($db)
             ->install(
                 'http://wordpress.local',

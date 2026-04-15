@@ -4,6 +4,8 @@ namespace Codeception\Template;
 
 use lucatume\WPBrowser\Adapters\Symfony\Component\Process\Process;
 use lucatume\WPBrowser\Tests\FSTemplates\BedrockProject;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
+use lucatume\WPBrowser\Tests\Traits\PhaseTimer;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Codeception;
 use lucatume\WPBrowser\Utils\Env;
@@ -20,6 +22,8 @@ class WpbrowserTest extends \Codeception\Test\Unit
 {
     use TmpFilesCleanup;
     use SnapshotAssertions;
+    use PhaseTimer;
+    use FastScaffold;
 
     private function mockComposerBin(string $directory): void
     {
@@ -565,7 +569,7 @@ EOT;
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($projectDir . '/site')
+        $this->fastScaffold($projectDir . '/site')
             ->configure($db)
             ->install(
                 'https://the-project.local',
@@ -633,7 +637,7 @@ EOT;
 }
 EOT;
 
-        $projectDir = FS::tmpDir('setup_', [
+        $projectDir = $this->phase('FS::tmpDir (tree)', fn() => FS::tmpDir('setup_', [
             'site' => [
                 'composer.json' => $composerFileCode,
                 'vendor' => [
@@ -641,21 +645,21 @@ EOT;
                     ]
                 ],
             ]
-        ]);
+        ]));
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($projectDir . '/site')
-            ->configure($db, InstallationStateInterface::MULTISITE_SUBDOMAIN)
-            ->install(
-                'https://the-project.local',
-                'admin',
-                'secret',
-                'admin@the-project.local',
-                'The Project',
-            );
+        $scaffolded = $this->phase('Installation::scaffold', fn() => $this->fastScaffold($projectDir . '/site'));
+        $configured = $this->phase('configure (multisite subdomain)', fn() => $scaffolded->configure($db, InstallationStateInterface::MULTISITE_SUBDOMAIN));
+        $this->phase('install (multisite)', fn() => $configured->install(
+            'https://the-project.local',
+            'admin',
+            'secret',
+            'admin@the-project.local',
+            'The Project',
+        ));
 
         $this->mockComposerBin($projectDir . '/site');
 
@@ -672,7 +676,7 @@ EOT;
             "yes\n" // Yes, use recommended setup.
         );
 
-        $process->mustRun();
+        $this->phase('codecept init wpbrowser (subprocess)', fn() => $process->mustRun());
 
         $this->assertDirectoryExists($projectDir . '/site/wp-content/mu-plugins/sqlite-database-integration');
         $this->assertFileExists($projectDir . '/site/wp-content/db.php');
@@ -688,14 +692,14 @@ EOT;
         unlink($projectDir . '/site/' . Codeception::dataDir() . '/db.sqlite');
         unlink($projectDir . '/site/' . Codeception::dataDir() . '/dump.sql');
 
-        $this->assertMatchesStringSnapshot(file_get_contents($projectDir . '/site/codeception.yml'));
+        $this->phase('assertMatchesStringSnapshot codeception.yml', fn() => $this->assertMatchesStringSnapshot(file_get_contents($projectDir . '/site/codeception.yml')));
         // Random ports will change: visit the data to replace the random ports with a placeholder.
-        $this->assertMatchesDirectorySnapshot(
+        $this->phase('assertMatchesDirectorySnapshot tests', fn() => $this->assertMatchesDirectorySnapshot(
             $projectDir . '/site/tests',
             function (array $expected, array $actual, string $file) {
                 return $this->replaceRandomPorts($expected, $actual, $file);
             }
-        );
+        ));
     }
 
     /**

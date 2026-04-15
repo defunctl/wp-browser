@@ -17,7 +17,7 @@ class BedrockProject
 
     public function scaffold(string $dir, string $version = 'latest'): string
     {
-        FS::recurseCopy(codecept_data_dir('fs-templates/bedrock'), $dir);
+        FS::cowCopy(codecept_data_dir('fs-templates/bedrock'), $dir);
 
         $envContents = file_get_contents($dir . '/.env');
 
@@ -52,7 +52,7 @@ class BedrockProject
             throw new RuntimeException('Could not write .env file.');
         }
 
-        FS::recurseCopy(Source::getForVersion($version), $dir . '/web/wp');
+        FS::cowCopy(Source::getForVersion($version), $dir . '/web/wp');
 
         return $dir;
     }

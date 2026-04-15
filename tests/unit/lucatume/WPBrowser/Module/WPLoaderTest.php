@@ -16,8 +16,10 @@ use lucatume\WPBrowser\Events\Dispatcher;
 use lucatume\WPBrowser\Module\WPLoader\FactoryStore;
 use lucatume\WPBrowser\Tests\FSTemplates\BedrockProject;
 use lucatume\WPBrowser\Tests\Traits\DatabaseAssertions;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\LoopIsolation;
 use lucatume\WPBrowser\Tests\Traits\MainInstallationAccess;
+use lucatume\WPBrowser\Tests\Traits\PhaseTimer;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
@@ -52,6 +54,8 @@ class WPLoaderTest extends Unit
     use LoopIsolation;
     use TmpFilesCleanup;
     use MainInstallationAccess;
+    use PhaseTimer;
+    use FastScaffold;
 
     protected $backupGlobals = false;
 
@@ -193,7 +197,7 @@ class WPLoaderTest extends Unit
     public function should_allow_specifying_the_wp_root_folder_as_a_relative_path_to_cwd_or_abspath(): void
     {
         $rootDir = FS::tmpDir('wploader_', ['test' => ['wordpress' => []]], 0777);
-        Installation::scaffold($rootDir . '/test/wordpress', '6.1.1');
+        $this->fastScaffold($rootDir . '/test/wordpress', '6.1.1');
         $dbName = Random::dbName();
         $this->config = [
             'wpRootFolder' => 'test/wordpress',
@@ -239,7 +243,7 @@ class WPLoaderTest extends Unit
     {
         $homeDir = FS::tmpDir('home_', ['projects' => ['work' => ['acme' => ['wordpress' => []]]]]);
         $wpRootDir = $homeDir . '/projects/work/acme/wordpress';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $this->config = [
             'wpRootFolder' => '~/projects/work/acme/wordpress',
@@ -269,7 +273,7 @@ class WPLoaderTest extends Unit
     public function should_allow_specifying_the_wp_root_folder_as_an_absolute_path(): void
     {
         $wpRootDir = FS::tmpDir();
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
@@ -297,7 +301,7 @@ class WPLoaderTest extends Unit
     public function should_allow_specifying_the_wp_root_folder_as_absolute_path_with_escaped_spaces(): void
     {
         $wpRootDir = FS::tmpDir('wploader_', ['Word Press' => []]);
-        Installation::scaffold($wpRootDir . '/Word Press', '6.1.1');
+        $this->fastScaffold($wpRootDir . '/Word Press', '6.1.1');
         $dbName = Random::dbName();
         $this->config = [
             'wpRootFolder' => $wpRootDir . '/Word\ Press',
@@ -363,7 +367,7 @@ class WPLoaderTest extends Unit
             'dbPassword' => $dbPassword,
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        $installation = Installation::scaffold($wpRootDir, '6.1.1')
+        $installation = $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db);
 
         $wpLoader = $this->module();
@@ -588,7 +592,7 @@ class WPLoaderTest extends Unit
     public function should_throw_if_load_only_and_installation_scaffolded(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
 
         $this->config = [
             'wpRootFolder' => $wpRootDir,
@@ -631,7 +635,7 @@ class WPLoaderTest extends Unit
             'domain' => ''
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db);
 
         $this->expectException(ModuleConfigException::class);
@@ -663,7 +667,7 @@ class WPLoaderTest extends Unit
             'domain' => 'wordpress.test'
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db);
 
         $wpLoader = $this->module();
@@ -701,7 +705,7 @@ class WPLoaderTest extends Unit
             'configFile' => codecept_data_dir('files/test_file_002.php'),
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'https://wp.local',
@@ -802,7 +806,7 @@ class WPLoaderTest extends Unit
             'configFile' => codecept_data_dir('files/test_file_002.php')
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'https://wp.local',
@@ -889,7 +893,7 @@ class WPLoaderTest extends Unit
             'loadOnly' => true,
         ];
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure($db);
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure($db);
 
         $wpLoader = $this->module();
         $mockDbModule = $this->createMock($dbModuleClass);
@@ -925,7 +929,7 @@ class WPLoaderTest extends Unit
             'dbPassword' => $dbPassword,
             'configFile' => __DIR__ . '/some-file-that-does-not-exist.php',
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $wpLoader = $this->module();
 
@@ -960,7 +964,7 @@ class WPLoaderTest extends Unit
                 codecept_data_dir('files/test_file_002.php'),
             ],
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $wpLoader = $this->module();
         $this->assertInIsolation(static function () use ($wpLoader, $wpRootDir) {
@@ -994,7 +998,7 @@ class WPLoaderTest extends Unit
             'dbUser' => $dbUser,
             'dbPassword' => $dbPassword
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $this->expectException(ModuleException::class);
         $this->expectExceptionMessageRegExp('/WordPress bootstrap failed/');
@@ -1040,7 +1044,7 @@ class WPLoaderTest extends Unit
             // WooCommerce has a minimum PHP version of 7.4.0 required.
             $this->config['plugins'][] = 'woocommerce/woocommerce.php';
         }
-        $installation = Installation::scaffold($wpRootDir, 'latest');
+        $installation = $this->fastScaffold($wpRootDir, 'latest');
         $this->copyOverContentFromTheMainInstallation($installation);
 
         $wpLoader = $this->module();
@@ -1132,7 +1136,7 @@ class WPLoaderTest extends Unit
             // WooCommerce has a minimum PHP version of 7.4.0 required.
             $this->config['plugins'][] = 'woocommerce/woocommerce.php';
         }
-        $installation = Installation::scaffold($wpRootDir, 'latest');
+        $installation = $this->fastScaffold($wpRootDir, 'latest');
         $this->copyOverContentFromTheMainInstallation($installation);
 
         $wpLoader = $this->module();
@@ -1231,7 +1235,7 @@ class WPLoaderTest extends Unit
                 'some-plugin/some-plugin.php',
             ]
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $this->expectException(ModuleException::class);
         $this->expectExceptionMessage(
@@ -1272,7 +1276,7 @@ class WPLoaderTest extends Unit
             ],
             'multisite' => true,
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $this->expectException(ModuleException::class);
         $this->expectExceptionMessage(
@@ -1310,7 +1314,7 @@ class WPLoaderTest extends Unit
             ],
             'theme' => 'some-theme',
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $this->expectException(ModuleException::class);
         $this->expectExceptionMessage('The theme directory "some-theme" does not exist');
@@ -1347,7 +1351,7 @@ class WPLoaderTest extends Unit
             'theme' => 'some-theme',
             'multisite' => true,
         ];
-        Installation::scaffold($wpRootDir, 'latest');
+        $this->fastScaffold($wpRootDir, 'latest');
 
         $this->expectException(ModuleException::class);
         $this->expectExceptionMessage('The theme directory "some-theme" does not exist');
@@ -1366,7 +1370,7 @@ class WPLoaderTest extends Unit
      */
     public function should_correctly_activate_child_theme_in_single_installation(): void
     {
-        $wpRootDir = FS::tmpDir('wploader_');
+        $wpRootDir = $this->phase('FS::tmpDir', fn() => FS::tmpDir('wploader_'));
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -1391,29 +1395,29 @@ class WPLoaderTest extends Unit
             // WooCommerce has a minimum PHP version of 7.4.0 required.
             $this->config['plugins'][] = 'woocommerce/woocommerce.php';
         }
-        $db = (new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost))->create();
-        $installation = Installation::scaffold($wpRootDir, 'latest')
-            ->configure($db)
-            ->install(
-                'https://wp.local',
-                'admin',
-                'password',
-                'admin@wp.local',
-                'Test'
-            );
-        $this->copyOverContentFromTheMainInstallation($installation);
+        $db = $this->phase('MysqlDatabase::create', fn() => (new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost))->create());
+        $scaffolded = $this->phase('Installation::scaffold', fn() => $this->fastScaffold($wpRootDir, 'latest'));
+        $configured = $this->phase('configure (mysql)', fn() => $scaffolded->configure($db));
+        $installation = $this->phase('install (mysql)', fn() => $configured->install(
+            'https://wp.local',
+            'admin',
+            'password',
+            'admin@wp.local',
+            'Test'
+        ));
+        $this->phase('copyOverContentFromTheMainInstallation', fn() => $this->copyOverContentFromTheMainInstallation($installation));
         // Create a twentytwenty-child theme.
-        $installation->runWpCliCommandOrThrow([
+        $this->phase('wp-cli scaffold child-theme', fn() => $installation->runWpCliCommandOrThrow([
             'scaffold',
             'child-theme',
             'some-child-theme',
             '--parent_theme=twentytwenty',
             '--theme_name=some-child-theme',
             '--force'
-        ]);
+        ]));
 
         $wpLoader = $this->module();
-        $installationOutput = $this->assertInIsolation(static function () use ($wpLoader, $wpRootDir) {
+        $isolationClosure = static function () use ($wpLoader, $wpRootDir) {
             $wpLoader->_initialize();
 
             Assert::assertEquals('twentytwenty', get_option('template'));
@@ -1423,7 +1427,11 @@ class WPLoaderTest extends Unit
                 'bootstrapOutput' => $wpLoader->_getBootstrapOutput(),
                 'installationOutput' => $wpLoader->_getInstallationOutput(),
             ];
-        });
+        };
+        $installationOutput = $this->phase(
+            'assertInIsolation (WPLoader init)',
+            fn() => $this->assertInIsolation($isolationClosure)
+        );
     }
 
     /**
@@ -1461,7 +1469,7 @@ class WPLoaderTest extends Unit
             $this->config['plugins'][] = 'woocommerce/woocommerce.php';
         }
         $db = (new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost))->create();
-        $installation = Installation::scaffold($wpRootDir, 'latest')
+        $installation = $this->fastScaffold($wpRootDir, 'latest')
             ->configure($db, InstallationStateInterface::MULTISITE_SUBFOLDER);
         $installation->install(
             'https://wp.local',
@@ -1516,7 +1524,7 @@ class WPLoaderTest extends Unit
             'dbPassword' => $dbPassword,
             'dump' => 'not-really-existing.sql'
         ];
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
 
         $this->expectException(ModuleConfigException::class);
 
@@ -1549,7 +1557,7 @@ class WPLoaderTest extends Unit
                 'not-really-existing.sql',
             ]
         ];
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
 
         $this->expectException(ModuleConfigException::class);
 
@@ -1582,7 +1590,7 @@ class WPLoaderTest extends Unit
             'dbPassword' => $dbPassword,
             'dump' => $dumpFiles
         ];
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
 
         $wpLoader = $this->module();
 
@@ -1617,7 +1625,7 @@ class WPLoaderTest extends Unit
             'dbPassword' => $dbPassword,
             'dump' => codecept_data_dir('files/test-dump-001.sql')
         ];
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
 
         $wpLoader = $this->module();
 
@@ -1653,7 +1661,7 @@ class WPLoaderTest extends Unit
                 codecept_data_dir('files/test-dump-003.sql'),
             ]
         ];
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
 
         $wpLoader = $this->module();
 
@@ -1675,7 +1683,7 @@ class WPLoaderTest extends Unit
     public function should_support_using_db_url_to_set_up_module(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $this->config = [
             'wpRootFolder' => $wpRootDir,
             'dbUrl' => 'mysql://User:secret!@127.0.0.1:2389/test_db',
@@ -1698,7 +1706,7 @@ class WPLoaderTest extends Unit
     public function should_throw_if_db_url_not_set_and_db_credentials_are_not_provided(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $this->config = ['wpRootFolder' => $wpRootDir];
 
         $this->expectException(ModuleConfigException::class);
@@ -1719,7 +1727,7 @@ class WPLoaderTest extends Unit
     public function should_place_sq_lite_dropin_if_using_sq_lite_database_for_tests(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $dbPathname = $wpRootDir . '/db.sqlite';
 
         $this->config = [
@@ -1745,7 +1753,7 @@ class WPLoaderTest extends Unit
     public function should_initialize_correctly_with_sqlite_database(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $dbPathname = $wpRootDir . '/db.sqlite';
         Installation::placeSqliteMuPlugin($wpRootDir . '/wp-content/mu-plugins', $wpRootDir . '/wp-content');
 
@@ -1774,7 +1782,7 @@ class WPLoaderTest extends Unit
     public function should_initialize_correctly_with_sqlite_database_in_load_only_mode(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         Installation::placeSqliteMuPlugin($wpRootDir . '/wp-content/mu-plugins', $wpRootDir . '/wp-content');
         $dbPathname = $wpRootDir . '/db.sqlite';
         $installation->configure(new SQLiteDatabase($wpRootDir, 'db.sqlite'));
@@ -1903,7 +1911,7 @@ PHP
     public function should_correctly_load_with_different_database_names(string $dbName): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
@@ -1947,7 +1955,7 @@ PHP
     public function should_not_backup_globals_by_default(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -2011,7 +2019,7 @@ PHP
     public function should_allow_controlling_the_backup_of_global_variables_in_the_wp_test_case(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -2258,7 +2266,7 @@ PHP
     public function should_allow_controlling_the_backup_of_static_attributes_in_the_wp_test_case(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -2599,7 +2607,7 @@ PHP
     public function should_skip_installation_when_skip_install_is_true(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -2798,7 +2806,7 @@ PHP
     public function should_fail_to_activate_when_plugins_generate_unexpected_output(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -2854,7 +2862,7 @@ PHP
     public function should_allow_activating_plugins_silently(): void
     {
         $wpRootDir = FS::tmpDir('wploader_');
-        $installation = Installation::scaffold($wpRootDir);
+        $installation = $this->fastScaffold($wpRootDir);
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');

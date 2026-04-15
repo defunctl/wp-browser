@@ -4,6 +4,7 @@
 namespace unit\lucatume\WPBrowser\WordPress\Database;
 
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Env;
@@ -24,6 +25,7 @@ class MysqlDatabaseTest extends Unit
 {
     use UopzFunctions;
     use TmpFilesCleanup;
+    use FastScaffold;
 
     /**
      * It should allow getting the db credentials and DSN
@@ -115,7 +117,7 @@ class MysqlDatabaseTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = new ConfigurationData();
         $configurationData->setConst('WP_PLUGIN_DIR', $wpRootDir . '/site-plugins');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db, InstallationStateInterface::SINGLE_SITE, $configurationData)
             ->install(
                 'https://wp.local',

@@ -2,6 +2,7 @@
 
 namespace lucatume\WPBrowser\WordPress\Database;
 
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
@@ -13,6 +14,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
 {
     use UopzFunctions;
     use TmpFilesCleanup;
+    use FastScaffold;
 
     /**
      * It should throw if building on non existing directory
@@ -302,7 +304,7 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
     {
         $wpRootDir = FS::tmpDir('sqlite_');
         $createDb = new SQLiteDatabase($wpRootDir, 'db.sqlite');
-        $installation = Installation::scaffold($wpRootDir, '6.1.1');
+        $installation = $this->fastScaffold($wpRootDir, '6.1.1');
         $installation->configure($createDb);
         $this->assertTrue($installation->usesSqlite());
 

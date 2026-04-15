@@ -7,6 +7,8 @@ use Codeception\Exception\ModuleException;
 use Codeception\Lib\Di;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
+use lucatume\WPBrowser\Tests\Traits\PhaseTimer;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
@@ -24,6 +26,8 @@ class WPCLITest extends Unit
 {
     use SnapshotAssertions;
     use TmpFilesCleanup;
+    use PhaseTimer;
+    use FastScaffold;
 
     protected $backupGlobals = false;
     /**
@@ -52,7 +56,7 @@ class WPCLITest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        self::$installation = Installation::scaffold($wpRootDir, '6.1.1')
+        self::$installation = $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'http://wp.local',
@@ -1127,15 +1131,17 @@ class WPCLITest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'wp_');
-        $firstInstallation = Installation::scaffold(FS::tmpDir('wpcli_'), '6.1.1')
-            ->configure($db)
-            ->install(
-                'http://wp.local',
-                'admin',
-                'secret',
-                'admin@admin',
-                'WPCLI Module Test Site'
-            );
+
+        $firstRoot = $this->phase('FS::tmpDir #1', fn() => FS::tmpDir('wpcli_'));
+        $firstScaffolded = $this->phase('Installation::scaffold #1', fn() => $this->fastScaffold($firstRoot, '6.1.1'));
+        $firstConfigured = $this->phase('configure #1', fn() => $firstScaffolded->configure($db));
+        $firstInstallation = $this->phase('install #1', fn() => $firstConfigured->install(
+            'http://wp.local',
+            'admin',
+            'secret',
+            'admin@admin',
+            'WPCLI Module Test Site'
+        ));
 
         $this->cleanupAfter[] = $firstInstallation->getWpRootDir();
 
@@ -1154,15 +1160,16 @@ WP_CLI::add_command('ping-one', function(){
 PHP;
         file_put_contents($firstInstallation->getMuPluginsDir() . '/command-one.php', $commandOneCode, LOCK_EX);
 
-        $secondInstallation = Installation::scaffold(FS::tmpDir('wpcli_'), '6.1.1')
-            ->configure($db)
-            ->install(
-                'http://wp.local',
-                'admin',
-                'secret',
-                'admin@admin',
-                'WPCLI Module Test Site'
-            );
+        $secondRoot = $this->phase('FS::tmpDir #2', fn() => FS::tmpDir('wpcli_'));
+        $secondScaffolded = $this->phase('Installation::scaffold #2', fn() => $this->fastScaffold($secondRoot, '6.1.1'));
+        $secondConfigured = $this->phase('configure #2', fn() => $secondScaffolded->configure($db));
+        $secondInstallation = $this->phase('install #2', fn() => $secondConfigured->install(
+            'http://wp.local',
+            'admin',
+            'secret',
+            'admin@admin',
+            'WPCLI Module Test Site'
+        ));
 
         $this->cleanupAfter[] = $secondInstallation->getWpRootDir();
 
@@ -1185,12 +1192,12 @@ PHP;
             'path' => $firstInstallation->getWpRootDir(),
         ]);
 
-        $wpcli->cli(['ping-one']);
+        $this->phase('wpcli->cli ping-one', fn() => $wpcli->cli(['ping-one']));
         $wpcli->seeInShellOutput('pong-one');
 
         $wpcli->changeWpcliPath($secondInstallation->getWpRootDir());
 
-        $wpcli->cli(['ping-two']);
+        $this->phase('wpcli->cli ping-two', fn() => $wpcli->cli(['ping-two']));
         $wpcli->seeInShellOutput('pong-two');
     }
 }

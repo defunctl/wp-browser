@@ -6,6 +6,7 @@ namespace lucatume\WPBrowser\Project;
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\Exceptions\InvalidArgumentException;
 use lucatume\WPBrowser\Tests\Traits\CliCommandTestingTools;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Env;
@@ -26,6 +27,7 @@ class PluginProjectTest extends Unit
     use UopzFunctions;
     use CliCommandTestingTools;
     use SnapshotAssertions;
+    use FastScaffold;
 
     /**
      * It should throw if built on non existing directory
@@ -98,7 +100,7 @@ class PluginProjectTest extends Unit
             Env::get('WORDPRESS_DB_PASSWORD'),
             Env::get('WORDPRESS_DB_HOST')
         );
-        Installation::scaffold($wpRootDir)
+        $this->fastScaffold($wpRootDir)
             ->configure($db)
             ->install(
                 'http://localhost:1234',

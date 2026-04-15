@@ -7,6 +7,7 @@ use Codeception\Lib\Di;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\TestCase\WPTestCase;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\LoopIsolation;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Env;
@@ -23,6 +24,7 @@ class WPTestCaseStrictTest extends Unit
 {
     use LoopIsolation;
     use TmpFilesCleanup;
+    use FastScaffold;
 
     private function module(array $moduleContainerConfig = [], ?array $moduleConfig = null): WPLoader
     {
@@ -69,7 +71,7 @@ class WPTestCaseStrictTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost);
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $db->create();
         $testcaseFile = $wpRootDir . '/BreakingTest.php';
         $testCaseFileContents = <<< PHP
@@ -185,7 +187,7 @@ class WPTestCaseStrictTest extends Unit
     {
         $wpRootDir = FS::tmpDir('wploader_');
         $db = new SQLiteDatabase($wpRootDir, 'db.sqlite', 'wptests_');
-        Installation::scaffold($wpRootDir);
+        $this->fastScaffold($wpRootDir);
         $db->create();
         $testcaseFile = $wpRootDir . '/BreakingTest.php';
         $testCaseFileContents = <<< PHP

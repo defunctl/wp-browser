@@ -28,6 +28,8 @@ class Filesystem
      */
     private static array $tmpFiles = [];
     private static ?SymfonyFilesystem $symfonyFilesystem = null;
+    private static ?\FFI $clonefileFfi = null;
+    private static bool $clonefileFfiAttempted = false;
 
     /**
      * Recursively removes a directory and all its content.
@@ -219,6 +221,165 @@ class Filesystem
         }
 
         return true;
+    }
+
+    /**
+     * Recursively copies a source to a destination using copy-on-write cloning where supported.
+     *
+     * On macOS this issues `cp -cR`, which uses clonefile(2) and transparently falls back to a
+     * regular copy on cross-volume / unsupported filesystem / xattr cases. On Linux it issues
+     * `cp -R --reflink=auto`, which uses FICLONE on btrfs/xfs/reflink-ext4 and silently reverts
+     * to a regular copy elsewhere. On any other platform, or if the clone command exits non-zero,
+     * it falls back to {@see self::recurseCopy()}.
+     *
+     * Test-only helper. Production code must use {@see self::recurseCopy()}; this method skips
+     * metadata preservation guarantees that some production callers may rely on.
+     *
+     * @param string $source      The absolute path to the source.
+     * @param string $destination The absolute path to the destination.
+     *
+     * @return bool Whether the copy was successful or not.
+     */
+    public static function cowCopy(string $source, string $destination): bool
+    {
+        if (self::tryClonefileDirect($source, $destination)) {
+            return true;
+        }
+
+        if (!is_dir($destination) && !mkdir($destination) && !is_dir($destination)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $destination));
+        }
+
+        $resolvedSource = self::resolvePath($source);
+
+        if ($resolvedSource === false) {
+            return false;
+        }
+
+        $resolvedDestination = self::resolvePath($destination);
+
+        if ($resolvedDestination === false) {
+            return false;
+        }
+
+        if (DIRECTORY_SEPARATOR === '\\') {
+            return self::recurseCopy($source, $destination);
+        }
+
+        if (is_dir($resolvedSource)) {
+            $resolvedSource = rtrim($resolvedSource, '\\/') . '/.';
+            $resolvedDestination = rtrim($resolvedDestination, '\\/') . '/';
+        }
+        $escapedSource = escapeshellarg($resolvedSource);
+        $escapedDestination = escapeshellarg($resolvedDestination);
+
+        $command = match (PHP_OS_FAMILY) {
+            'Darwin' => "cp -cR $escapedSource $escapedDestination",
+            'Linux'  => "cp -R --reflink=auto $escapedSource $escapedDestination",
+            default  => null,
+        };
+
+        if ($command === null) {
+            return self::recurseCopy($source, $destination);
+        }
+
+        try {
+            exec($command, $output, $exitCode);
+        } catch (Exception $e) {
+            $exitCode = $e->getCode();
+            $output = $e->getMessage();
+        }
+
+        if ($exitCode !== 0) {
+            codecept_debug("CoW copy failed with exit code $exitCode and message: " .
+                (is_string($output) ? $output : implode(PHP_EOL, $output)) . '; falling back to recurseCopy');
+            return self::recurseCopy($source, $destination);
+        }
+
+        return true;
+    }
+
+    /**
+     * Fast-path for cowCopy: direct clonefile(2) syscall via FFI on macOS.
+     *
+     * macOS has an atomic recursive directory clone at the APFS level, callable through libSystem's
+     * clonefile(). BSD `cp -cR` uses the same syscall but issues one call per file; calling it
+     * directly on a directory path gives near-constant time regardless of tree size. Linux has no
+     * recursive-directory equivalent, so the FFI path is intentionally macOS-only — Linux falls
+     * through to the cp -R --reflink=auto path in {@see self::cowCopy()}.
+     */
+    private static function tryClonefileDirect(string $source, string $destination): bool
+    {
+        if (PHP_OS_FAMILY !== 'Darwin') {
+            return false;
+        }
+        if (!extension_loaded('ffi')) {
+            return false;
+        }
+        if (!file_exists($source)) {
+            return false;
+        }
+
+        // clonefile(2) requires the destination not to exist. Accept a pre-created empty
+        // directory (the typical hot case, since most callers hand us a fresh FS::tmpDir) by
+        // removing it; bail on any other pre-existing target and let the cp -cR fallback merge.
+        if (is_dir($destination)) {
+            $entries = @scandir($destination);
+            if ($entries === false) {
+                return false;
+            }
+            $entries = array_diff($entries, ['.', '..']);
+            if ($entries) {
+                return false;
+            }
+            if (!@rmdir($destination)) {
+                return false;
+            }
+        } elseif (file_exists($destination)) {
+            return false;
+        }
+
+        $ffi = self::clonefileFfi();
+        if ($ffi === null) {
+            return false;
+        }
+
+        try {
+            /** @phpstan-ignore-next-line */
+            $result = $ffi->clonefile($source, $destination, 0);
+        } catch (\Throwable $e) {
+            codecept_debug('FFI clonefile threw: ' . $e->getMessage() . '; falling back to cp');
+            return false;
+        }
+
+        return $result === 0;
+    }
+
+    /**
+     * Lazily binds clonefile(3) from libSystem via FFI. Cached for the lifetime of the process.
+     * Returns null on any failure (FFI disabled, dylib missing, cdef rejected) so the caller can
+     * fall through to the non-FFI code path.
+     */
+    private static function clonefileFfi(): ?\FFI
+    {
+        if (self::$clonefileFfi !== null) {
+            return self::$clonefileFfi;
+        }
+        if (self::$clonefileFfiAttempted) {
+            return null;
+        }
+        self::$clonefileFfiAttempted = true;
+
+        try {
+            self::$clonefileFfi = \FFI::cdef(
+                'int clonefile(const char *src, const char *dst, unsigned int flags);',
+                'libSystem.dylib'
+            );
+            return self::$clonefileFfi;
+        } catch (\Throwable $e) {
+            codecept_debug('FFI bind failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**

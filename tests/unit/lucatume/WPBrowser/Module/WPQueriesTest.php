@@ -6,6 +6,7 @@ use Codeception\Exception\ModuleException;
 use Codeception\Lib\Di;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
@@ -17,6 +18,7 @@ use wpdb;
 class WPQueriesTest extends Unit
 {
     use UopzFunctions;
+    use FastScaffold;
 
     /**
      * @var bool
@@ -40,7 +42,7 @@ class WPQueriesTest extends Unit
     {
         if (self::$wpRootDir === null) {
             self::$wpRootDir = FS::tmpDir('wpqueries_');
-            Installation::scaffold(self::$wpRootDir, '6.1.1');
+            $this->fastScaffold(self::$wpRootDir, '6.1.1');
         }
 
         $moduleContainer = new ModuleContainer(new Di,

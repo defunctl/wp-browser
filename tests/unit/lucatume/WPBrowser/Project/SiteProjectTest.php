@@ -4,6 +4,7 @@
 namespace lucatume\WPBrowser\Project;
 
 use lucatume\WPBrowser\Exceptions\RuntimeException;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
 use lucatume\WPBrowser\WordPress\Installation;
@@ -14,6 +15,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 class SiteProjectTest extends \Codeception\Test\Unit
 {
     use TmpFilesCleanup;
+    use FastScaffold;
 
 
     /**
@@ -64,7 +66,7 @@ EOT;
                 'composer.json' => $composerFileCode
             ]
         ]);
-        Installation::scaffold($projectDir);
+        $this->fastScaffold($projectDir);
 
         $this->expectException(RuntimeException::class);
 

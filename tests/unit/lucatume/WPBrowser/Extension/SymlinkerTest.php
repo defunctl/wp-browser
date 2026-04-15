@@ -9,6 +9,7 @@ use Codeception\Exception\ModuleException;
 use Codeception\Suite;
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\Extension\Symlinker;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\LoopIsolation;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
@@ -20,6 +21,7 @@ class SymlinkerTest extends Unit
 {
     use LoopIsolation;
     use TmpFilesCleanup;
+    use FastScaffold;
 
     private function getSuiteEvent(): SuiteEvent
     {
@@ -111,7 +113,7 @@ class SymlinkerTest extends Unit
     {
         $workingDir = FS::tmpDir('symlinker_');
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $symlinker = new Symlinker([
@@ -242,7 +244,7 @@ class SymlinkerTest extends Unit
             ]
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {
@@ -364,7 +366,7 @@ class SymlinkerTest extends Unit
             ]
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {
@@ -486,7 +488,7 @@ class SymlinkerTest extends Unit
             ]
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {
@@ -607,7 +609,7 @@ class SymlinkerTest extends Unit
             ]
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {
@@ -729,7 +731,7 @@ class SymlinkerTest extends Unit
             ]
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {
@@ -829,7 +831,7 @@ class SymlinkerTest extends Unit
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
         $otherDir = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->expectException(ModuleException::class);
@@ -875,7 +877,7 @@ class SymlinkerTest extends Unit
             PHP
         ]);
         $wpRoot = FS::tmpDir('symlinker_');
-        Installation::scaffold($wpRoot);
+        $this->fastScaffold($wpRoot);
         $suiteEvent = $this->getSuiteEvent();
 
         $this->assertInIsolation(static function () use ($workingDir, $wpRoot, $suiteEvent) {

@@ -8,6 +8,7 @@ use Codeception\Lib\ModuleContainer;
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\Module\WPLoader;
 use lucatume\WPBrowser\Tests\Traits\DatabaseAssertions;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\LoopIsolation;
 use lucatume\WPBrowser\Tests\Traits\MainInstallationAccess;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
@@ -28,6 +29,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
     use LoopIsolation;
     use TmpFilesCleanup;
     use MainInstallationAccess;
+    use FastScaffold;
 
     private ModuleContainer $mockModuleContainer;
     private array $config = [];
@@ -113,7 +115,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
             ]
         ]);
         $wpRootDir = $themeProjectDir . '/var/wordpress';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -307,7 +309,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
             ]
         ]);
         $wpRootDir = $themeProjectDir . '/var/wordpress';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -535,7 +537,7 @@ public function invalidThemeConfigurationDataProvider(): array
         ]);
         $wpRootDir = $childThemeDir . '/var/wordpress';
         $parentThemeDir = $childThemeDir . '/vendor/acme/parent-theme';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -677,7 +679,7 @@ public function invalidThemeConfigurationDataProvider(): array
         ]);
         $wpRootDir = $childThemeDir . '/var/wordpress';
         $parentThemeDir = $childThemeDir . '/vendor/acme/parent-theme';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');

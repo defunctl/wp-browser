@@ -4,12 +4,14 @@
 namespace lucatume\WPBrowser\WordPress;
 
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Utils\Filesystem as FS;
 
 class VersionTest extends Unit
 {
     use TmpFilesCleanup;
+    use FastScaffold;
 
     /**
      * It should throw when built on non-existing root directory
@@ -97,7 +99,7 @@ PHP;
     public function should_return_the_version_information_from_files(): void
     {
         $wpRootDir = FS::tmpDir('version_');
-        Installation::scaffold($wpRootDir, '5.5.1');
+        $this->fastScaffold($wpRootDir, '5.5.1');
 
         $version = new Version($wpRootDir);
 

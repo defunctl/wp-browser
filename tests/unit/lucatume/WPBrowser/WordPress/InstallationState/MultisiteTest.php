@@ -5,6 +5,7 @@ namespace lucatume\WPBrowser\WordPress\InstallationState;
 
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\Exceptions\InvalidArgumentException;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Env;
@@ -21,6 +22,7 @@ class MultisiteTest extends Unit
 {
     use UopzFunctions;
     use TmpFilesCleanup;
+    use FastScaffold;
 
     /**
      * It should throw if trying to build on missing root directory
@@ -77,7 +79,7 @@ class MultisiteTest extends Unit
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost);
         $wpRootDir = FS::tmpDir('multisite_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'https://wp.local',
@@ -109,7 +111,7 @@ class MultisiteTest extends Unit
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost);
         $wpRootDir = FS::tmpDir('multisite_');
-        $installation = Installation::scaffold($wpRootDir, '6.1.1')
+        $installation = $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'https://wp.local',
@@ -140,7 +142,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost);
         $wpRootDir = FS::tmpDir('multisite_');
 
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db, InstallationStateInterface::MULTISITE_SUBDOMAIN)
             ->install(
                 'https://wp.local',
@@ -173,7 +175,7 @@ class MultisiteTest extends Unit
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost);
         $wpRootDir = FS::tmpDir('multisite_');
-        Installation::scaffold($wpRootDir, '6.1.1')
+        $this->fastScaffold($wpRootDir, '6.1.1')
             ->configure($db)
             ->install(
                 'https://wp.local',
@@ -227,7 +229,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure($db)->install(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure($db)->install(
             'https://wp.local',
             'admin',
             'password',
@@ -278,7 +280,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -311,7 +313,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -370,7 +372,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -407,7 +409,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -439,7 +441,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WP_CONTENT_DIR', $wpRootDir . '/site-content');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -472,7 +474,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WP_PLUGIN_DIR', $wpRootDir . '/site-plugins');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -505,7 +507,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -537,7 +539,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WP_CONTENT_DIR', $wpRootDir . '/site-content');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -570,7 +572,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WPMU_PLUGIN_DIR', $wpRootDir . '/site-mu-plugins');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -603,7 +605,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )->install(
@@ -640,7 +642,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WP_CONTENT_DIR', $wpRootDir . '/site-content');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -677,7 +679,7 @@ class MultisiteTest extends Unit
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData());
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -715,7 +717,7 @@ class MultisiteTest extends Unit
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
         $configurationData = (new ConfigurationData())
             ->setConst('WP_CONTENT_DIR', $wpRootDir . '/site-content');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER,
             $configurationData
@@ -751,7 +753,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )
@@ -783,7 +785,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )
@@ -818,7 +820,7 @@ class MultisiteTest extends Unit
         $dbUser = Env::get('WORDPRESS_DB_USER');
         $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
         $db = new MysqlDatabase($dbName, $dbUser, $dbPassword, $dbHost, 'test_');
-        Installation::scaffold($wpRootDir, '6.1.1')->configure(
+        $this->fastScaffold($wpRootDir, '6.1.1')->configure(
             $db,
             InstallationStateInterface::MULTISITE_SUBFOLDER
         )
