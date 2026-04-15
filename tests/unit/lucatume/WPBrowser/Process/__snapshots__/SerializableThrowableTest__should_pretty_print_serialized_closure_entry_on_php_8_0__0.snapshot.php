@@ -1,4 +1,4 @@
-/tests/unit/lucatume/WPBrowser/Process/SerializableThrowableTest.php:44
+/tests/unit/lucatume/WPBrowser/Process/SerializableThrowableTest.php:47
 closure://static function () {
    1|            $set = 'foo';
    2|            $bar = 'bar';
