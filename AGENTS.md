@@ -1,10 +1,5 @@
 This project is called "wp-browser" and it's a set of Codeception modules aimed at testing WordPress plugins, themes and sites.
 
-## Skill
-
-By default, do not use any skill to work on this project. Approach this as an expert PHP developer working on a codebase similar to the Symfony one.
-When you review code part of this project, you can discard security concerns. No part of this project will ever ship to production: it's a testing tools.
-
 ## Tests
 
 The diverse nature of the code part of this project demands different approaches to testing: the code can be tested at the unit level, integration level, functional level and end-to-end level.  
