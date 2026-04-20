@@ -116,4 +116,96 @@ class WorkerEnvTest extends Unit
         $this->assertSame('/custom/tmp/w2', $env['TEST_TMP_ROOT_DIR']);
         $this->assertSame('/custom/cache/w2', $env['TEST_CACHE_DIR']);
     }
+
+    public function test_overrides_for_worker_0_uses_base_ports(): void
+    {
+        $tokens = WorkerEnv::overridesForWorker(0);
+        $values = $this->overrideValues($tokens);
+
+        $this->assertNotEmpty($values);
+        $this->assertTrue($this->anyContains($values, 'ChromeDriverController') && $this->anyContains($values, 'port: 2390'));
+        $this->assertTrue($this->anyContains($values, 'BuiltInServerController') && $this->anyContains($values, 'port: 2389'));
+        $this->assertTrue($this->anyContains($values, 'MysqlServerController') && $this->anyContains($values, 'port: 2391'));
+    }
+
+    public function test_overrides_for_worker_shifts_ports_by_stride(): void
+    {
+        $tokens = WorkerEnv::overridesForWorker(3);
+        $values = $this->overrideValues($tokens);
+
+        $this->assertTrue($this->anyContains($values, 'ChromeDriverController') && $this->anyContains($values, 'port: 2420'));
+        $this->assertTrue($this->anyContains($values, 'BuiltInServerController') && $this->anyContains($values, 'port: 2419'));
+        $this->assertTrue($this->anyContains($values, 'MysqlServerController') && $this->anyContains($values, 'port: 2421'));
+    }
+
+    public function test_overrides_are_splattable_cli_tokens(): void
+    {
+        $tokens = WorkerEnv::overridesForWorker(2);
+
+        $this->assertNotEmpty($tokens);
+        $this->assertSame(0, count($tokens) % 2, 'tokens come in --override/value pairs');
+        for ($i = 0, $n = count($tokens); $i < $n; $i += 2) {
+            $this->assertSame('--override', $tokens[$i]);
+            $this->assertIsString($tokens[$i + 1]);
+            $this->assertNotSame('', $tokens[$i + 1]);
+        }
+    }
+
+    public function test_override_values_contain_extension_fqcns_and_prefix(): void
+    {
+        $values = $this->overrideValues(WorkerEnv::overridesForWorker(0));
+
+        $joined = implode("\n", $values);
+        $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\ChromeDriverController', $joined);
+        $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\BuiltInServerController', $joined);
+        $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\MysqlServerController', $joined);
+    }
+
+    public function test_allocated_ports_override_stride_defaults(): void
+    {
+        $ports = [
+            'WORDPRESS_LOCALHOST_PORT'    => 55001,
+            'CHROMEDRIVER_PORT'           => 55002,
+            'WORDPRESS_DB_LOCALHOST_PORT' => 55003,
+        ];
+        $env = WorkerEnv::build(2, [], null, $ports);
+
+        $this->assertSame('55001', $env['WORDPRESS_LOCALHOST_PORT']);
+        $this->assertSame('55002', $env['CHROMEDRIVER_PORT']);
+        $this->assertSame('55003', $env['WORDPRESS_DB_LOCALHOST_PORT']);
+
+        $tokens = WorkerEnv::overridesForWorker(2, $ports);
+        $joined = implode("\n", $tokens);
+        $this->assertStringContainsString('port: 55001', $joined);
+        $this->assertStringContainsString('port: 55002', $joined);
+        $this->assertStringContainsString('port: 55003', $joined);
+    }
+
+    /**
+     * @param string[] $tokens
+     * @return string[]
+     */
+    private function overrideValues(array $tokens): array
+    {
+        $out = [];
+        for ($i = 0, $n = count($tokens); $i < $n; $i += 2) {
+            if (($tokens[$i] ?? null) === '--override' && isset($tokens[$i + 1])) {
+                $out[] = $tokens[$i + 1];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * @param string[] $values
+     */
+    private function anyContains(array $values, string $needle): bool
+    {
+        foreach ($values as $v) {
+            if (str_contains($v, $needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

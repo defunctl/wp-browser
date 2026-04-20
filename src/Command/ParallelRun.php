@@ -3,9 +3,12 @@
 namespace lucatume\WPBrowser\Command;
 
 use Codeception\Command\Run;
+use Codeception\Configuration;
 use Codeception\CustomCommandInterface;
 use lucatume\WPBrowser\Adapters\Symfony\Component\Process\Process;
 use lucatume\WPBrowser\Command\ParallelRun\DotAggregator;
+use lucatume\WPBrowser\Command\ParallelRun\PortAllocator;
+use lucatume\WPBrowser\Command\ParallelRun\ShardPlanner;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerEnv;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -65,7 +68,22 @@ class ParallelRun extends Run implements CustomCommandInterface
 
         $aggregator = new DotAggregator($output);
         $output->writeln(sprintf('<info>Running suite "%s" across %d workers</info>', $suite, $workers));
+
+        [$mode, $shardAssignments] = $this->resolveShardPlan($suite, $testPath, $workers, $cwd ?? '.');
+        $output->writeln(sprintf('<info>Sharding mode: %s</info>', $mode));
+        if ($mode !== ShardPlanner::MODE_SHARD && $shardAssignments !== []) {
+            foreach ($shardAssignments as $i => $shard) {
+                $output->writeln(sprintf(
+                    '  shard %d: %d files, weight %.2f',
+                    $i,
+                    count($shard['files']),
+                    $shard['weight']
+                ));
+            }
+        }
         $output->writeln('');
+
+        $workerPorts = $this->allocateWorkerPorts($workers);
 
         $start = microtime(true);
 
@@ -76,21 +94,41 @@ class ParallelRun extends Run implements CustomCommandInterface
         /** @var array<int,int> $eventOffsets */
         $eventOffsets = [];
         for ($i = 1; $i <= $workers; $i++) {
+            if ($mode !== ShardPlanner::MODE_SHARD && ($shardAssignments[$i]['files'] ?? []) === []) {
+                continue;
+            }
             $xmlPath   = sprintf('%s/shard-%d.xml', $reportDir, $i);
             $eventFile = sprintf('%s/events-%d.bin', $reportDir, $i);
             touch($eventFile);
             $eventFiles[$i]   = $eventFile;
             $eventOffsets[$i] = 0;
-            $env = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env');
+            $ports = $workerPorts[$i];
+            $env   = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env', $ports);
             $env['WPBROWSER_PARALLEL_EVENT_FILE'] = $eventFile;
+
+            if ($mode === ShardPlanner::MODE_SHARD) {
+                $shardArgs = ['--shard', "$i/$workers"];
+                $suiteArgs = $testPath !== '' ? [$suite, $testPath] : [$suite];
+            } else {
+                $groupName = 'wpb_parallel_' . $i;
+                $groupFile = sprintf('%s/shard-%d.group.txt', $reportDir, $i);
+                file_put_contents($groupFile, implode("\n", $shardAssignments[$i]['files']) . "\n");
+                $shardArgs = [
+                    '--override', 'groups: {' . $groupName . ': ' . $groupFile . '}',
+                    '--group', $groupName,
+                ];
+                $suiteArgs = [$suite];
+            }
+
             $cmd = array_merge(
-                [$codeceptBin, 'codeception:run', $suite],
-                $testPath !== '' ? [$testPath] : [],
-                ['--shard', "$i/$workers"],
+                [$codeceptBin, 'codeception:run'],
+                $suiteArgs,
+                $shardArgs,
                 ['--ext', 'lucatume\\WPBrowser\\Extension\\ParallelWorkerReporter'],
                 ['--xml', $xmlPath],
                 ['--no-colors'],
                 ['--no-artifacts'],
+                WorkerEnv::overridesForWorker($i - 1, $ports),
                 $passThrough
             );
             $p = new Process($cmd, $cwd, $env, null, null);
@@ -132,6 +170,29 @@ class ParallelRun extends Run implements CustomCommandInterface
         return ($failed || $aggregator->hasFailures()) ? 1 : 0;
     }
 
+    /**
+     * @return array<int, array<string,int>>
+     */
+    private function allocateWorkerPorts(int $workers): array
+    {
+        $preferred = [
+            'WORDPRESS_LOCALHOST_PORT'    => 2389,
+            'CHROMEDRIVER_PORT'           => 2390,
+            'WORDPRESS_DB_LOCALHOST_PORT' => 2391,
+        ];
+        $reserved = [];
+        $out = [];
+        foreach ($preferred as $key => $base) {
+            $ports = PortAllocator::allocate($workers, $base, $reserved);
+            foreach ($ports as $idx => $port) {
+                $workerIdx = $idx + 1;
+                $out[$workerIdx][$key] = $port;
+                $reserved[$port] = true;
+            }
+        }
+        return $out;
+    }
+
     private function resolveWorkers(string $raw): int
     {
         if ($raw === 'auto') {
@@ -147,7 +208,7 @@ class ParallelRun extends Run implements CustomCommandInterface
      */
     private function buildPassThroughOptions(InputInterface $input): array
     {
-        $suppress = ['workers', 'shard', 'xml', 'ext', 'no-colors', 'no-artifacts'];
+        $suppress = ['workers', 'shard', 'xml', 'ext', 'no-colors', 'no-artifacts', 'override', 'group'];
         $out = [];
         foreach ($this->getDefinition()->getOptions() as $opt) {
             $name = $opt->getName();
@@ -202,6 +263,52 @@ class ParallelRun extends Run implements CustomCommandInterface
         if ($chunk !== '') {
             $aggregator->ingest($worker, 'out', $chunk);
         }
+    }
+
+    /**
+     * @return array{0: string, 1: array<int, array{files: string[], weight: float}>}
+     */
+    private function resolveShardPlan(string $suite, string $testPath, int $workers, string $cwd): array
+    {
+        if ($testPath !== '') {
+            return [ShardPlanner::MODE_SHARD, []];
+        }
+
+        $planner = new ShardPlanner();
+        $weights = $planner->fromReport($cwd . '/var/_output/report.xml');
+        $mode    = ShardPlanner::MODE_SHARD;
+
+        if ($weights !== []) {
+            $mode = ShardPlanner::MODE_TIMINGS;
+        } else {
+            $suiteRoot = $this->resolveSuiteTestsRoot($suite);
+            if ($suiteRoot !== null) {
+                $weights = $planner->fromTags($suiteRoot);
+                if ($weights !== []) {
+                    $mode = ShardPlanner::MODE_TAGS;
+                }
+            }
+        }
+
+        if ($weights === []) {
+            return [ShardPlanner::MODE_SHARD, []];
+        }
+        return [$mode, $planner->plan($weights, $workers)];
+    }
+
+    private function resolveSuiteTestsRoot(string $suite): ?string
+    {
+        try {
+            $settings = Configuration::suiteSettings($suite, Configuration::config());
+        } catch (\Throwable) {
+            return null;
+        }
+        $path = $settings['path'] ?? '';
+        if (!is_string($path) || $path === '' || !is_dir($path)) {
+            return null;
+        }
+        $real = realpath($path);
+        return $real !== false ? $real : $path;
     }
 
     private function cleanupReportDir(string $dir): void
