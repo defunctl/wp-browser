@@ -10,6 +10,10 @@ use lucatume\WPBrowser\Command\ParallelRun\DotAggregator;
 use lucatume\WPBrowser\Command\ParallelRun\PortAllocator;
 use lucatume\WPBrowser\Command\ParallelRun\ShardPlanner;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerEnv;
+use lucatume\WPBrowser\Utils\Db;
+use lucatume\WPBrowser\Utils\Env;
+use lucatume\WPBrowser\Utils\Filesystem;
+use lucatume\WPBrowser\WordPress\Database\MysqlDatabase;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -85,87 +89,93 @@ class ParallelRun extends Run implements CustomCommandInterface
 
         $workerPorts = $this->allocateWorkerPorts($workers);
 
+        $this->setupWorkers($workers, $cwd ?? '.', $output);
+
         $start = microtime(true);
 
-        /** @var array<int,Process> $running */
-        $running = [];
-        /** @var array<int,string> $eventFiles */
+        $failed = false;
         $eventFiles = [];
-        /** @var array<int,int> $eventOffsets */
         $eventOffsets = [];
-        for ($i = 1; $i <= $workers; $i++) {
-            if ($mode !== ShardPlanner::MODE_SHARD && ($shardAssignments[$i]['files'] ?? []) === []) {
-                continue;
-            }
-            $xmlPath   = sprintf('%s/shard-%d.xml', $reportDir, $i);
-            $eventFile = sprintf('%s/events-%d.bin', $reportDir, $i);
-            touch($eventFile);
-            $eventFiles[$i]   = $eventFile;
-            $eventOffsets[$i] = 0;
-            $ports = $workerPorts[$i];
-            $env   = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env', $ports);
-            $env['WPBROWSER_PARALLEL_EVENT_FILE'] = $eventFile;
 
-            if ($mode === ShardPlanner::MODE_SHARD) {
-                $shardArgs = ['--shard', "$i/$workers"];
-                $suiteArgs = $testPath !== '' ? [$suite, $testPath] : [$suite];
-            } else {
-                $groupName = 'wpb_parallel_' . $i;
-                $groupFile = sprintf('%s/shard-%d.group.txt', $reportDir, $i);
-                file_put_contents($groupFile, implode("\n", $shardAssignments[$i]['files']) . "\n");
-                $shardArgs = [
+        try {
+            /** @var array<int,Process> $running */
+            $running = [];
+            for ($i = 1; $i <= $workers; $i++) {
+                if ($mode !== ShardPlanner::MODE_SHARD && ($shardAssignments[$i]['files'] ?? []) === []) {
+                    continue;
+                }
+                $xmlPath   = sprintf('%s/shard-%d.xml', $reportDir, $i);
+                $eventFile = sprintf('%s/events-%d.bin', $reportDir, $i);
+                touch($eventFile);
+                $eventFiles[$i]   = $eventFile;
+                $eventOffsets[$i] = 0;
+                $ports = $workerPorts[$i];
+                $env   = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env', $ports);
+                $env['WPBROWSER_PARALLEL_EVENT_FILE'] = $eventFile;
+
+                if ($mode === ShardPlanner::MODE_SHARD) {
+                    $shardArgs = ['--shard', "$i/$workers"];
+                    $suiteArgs = $testPath !== '' ? [$suite, $testPath] : [$suite];
+                } else {
+                    $groupName = 'wpb_parallel_' . $i;
+                    $groupFile = sprintf('%s/shard-%d.group.txt', $reportDir, $i);
+                    file_put_contents($groupFile, implode("\n", $shardAssignments[$i]['files']) . "\n");
+                    $shardArgs = [
                     '--override', 'groups: {' . $groupName . ': ' . $groupFile . '}',
                     '--group', $groupName,
-                ];
-                $suiteArgs = [$suite];
-            }
-
-            $cmd = array_merge(
-                [$codeceptBin, 'codeception:run'],
-                $suiteArgs,
-                $shardArgs,
-                ['--ext', 'lucatume\\WPBrowser\\Extension\\ParallelWorkerReporter'],
-                ['--xml', $xmlPath],
-                ['--no-colors'],
-                ['--no-artifacts'],
-                WorkerEnv::overridesForWorker($i - 1, $ports),
-                $passThrough
-            );
-            $p = new Process($cmd, $cwd, $env, null, null);
-            $p->setTimeout(null);
-            $p->start(static function (string $type, string $data) use ($aggregator, $i): void {
-                if ($type !== Process::OUT) {
-                    $aggregator->ingest($i, 'err', $data);
+                    ];
+                    $suiteArgs = [$suite];
                 }
-            });
-            $running[$i] = $p;
-        }
 
-        $failed    = false;
-        $remaining = $running;
-        while ($remaining !== []) {
-            foreach ($remaining as $i => $p) {
-                $this->drainEvents($eventFiles[$i], $eventOffsets, $i, $aggregator);
-                if (!$p->isRunning()) {
-                    if (!$p->isSuccessful()) {
-                        $failed = true;
-                        $aggregator->recordCrash($i, $p->getExitCode() ?? -1);
+                $cmd = array_merge(
+                    [$codeceptBin, 'codeception:run'],
+                    $suiteArgs,
+                    $shardArgs,
+                    ['--ext', 'lucatume\\WPBrowser\\Extension\\ParallelWorkerReporter'],
+                    ['--xml', $xmlPath],
+                    ['--no-colors'],
+                    ['--no-artifacts'],
+                    ['--override', 'paths: output: var/_output/w' . ($i - 1)],
+                    WorkerEnv::overridesForWorker($i - 1, $ports),
+                    $passThrough
+                );
+                $p = new Process($cmd, $cwd, $env, null, null);
+                $p->setTimeout(null);
+                $p->start(static function (string $type, string $data) use ($aggregator, $i): void {
+                    if ($type !== Process::OUT) {
+                        $aggregator->ingest($i, 'err', $data);
                     }
-                    unset($remaining[$i]);
+                });
+                $running[$i] = $p;
+            }
+
+            $remaining = $running;
+            while ($remaining !== []) {
+                foreach ($remaining as $i => $p) {
+                    $this->drainEvents($eventFiles[$i], $eventOffsets, $i, $aggregator);
+                    if (!$p->isRunning()) {
+                        if (!$p->isSuccessful()) {
+                            $failed = true;
+                            $aggregator->recordCrash($i, $p->getExitCode() ?? -1);
+                        }
+                        unset($remaining[$i]);
+                    }
+                }
+                if ($remaining !== []) {
+                    usleep(50_000);
                 }
             }
-            if ($remaining !== []) {
-                usleep(50_000);
+            foreach ($eventFiles as $i => $file) {
+                $this->drainEvents($file, $eventOffsets, $i, $aggregator);
+                $aggregator->mergeXml(sprintf('%s/shard-%d.xml', $reportDir, $i));
             }
-        }
-        foreach ($eventFiles as $i => $file) {
-            $this->drainEvents($file, $eventOffsets, $i, $aggregator);
-            $aggregator->mergeXml(sprintf('%s/shard-%d.xml', $reportDir, $i));
-        }
 
-        $aggregator->flushSummary(microtime(true) - $start);
+            $aggregator->flushSummary(microtime(true) - $start);
 
-        $this->cleanupReportDir($reportDir);
+            $this->cleanupReportDir($reportDir);
+        } finally {
+            $this->teardownWorkers($workers, $cwd ?? '.', $output);
+        }
 
         return ($failed || $aggregator->hasFailures()) ? 1 : 0;
     }
@@ -176,9 +186,8 @@ class ParallelRun extends Run implements CustomCommandInterface
     private function allocateWorkerPorts(int $workers): array
     {
         $preferred = [
-            'WORDPRESS_LOCALHOST_PORT'    => 2389,
-            'CHROMEDRIVER_PORT'           => 2390,
-            'WORDPRESS_DB_LOCALHOST_PORT' => 2391,
+            'WORDPRESS_LOCALHOST_PORT' => 2389,
+            'CHROMEDRIVER_PORT'        => 2390,
         ];
         $reserved = [];
         $out = [];
@@ -318,6 +327,159 @@ class ParallelRun extends Run implements CustomCommandInterface
         }
         foreach (glob($dir . '/*') ?: [] as $f) {
             @unlink($f);
+        }
+        @rmdir($dir);
+    }
+
+    private function setupWorkers(int $workers, string $cwd, OutputInterface $output): void
+    {
+        $this->ensureMysqlReachable($cwd, $output);
+        $this->createWorkerDatabases($workers, $cwd, $output);
+        $this->createWorkerOutputDirs($workers, $cwd, $output);
+    }
+
+    private function ensureMysqlReachable(string $cwd, OutputInterface $output): void
+    {
+        $envFile = $cwd . '/tests/.env';
+        $envVars = array_merge($_ENV, (array)Env::envFile($envFile));
+
+        $host = $envVars['WORDPRESS_DB_HOST'] ?? '127.0.0.1:2391';
+        $user = $envVars['WORDPRESS_DB_USER'] ?? 'root';
+        $pass = $envVars['WORDPRESS_DB_PASSWORD'] ?? '';
+
+        // Parse host:port
+        $parts = explode(':', $host);
+        $ip = $parts[0] ?? '127.0.0.1';
+        $port = (int)($parts[1] ?? 3306);
+
+        try {
+            $pdo = new \PDO("mysql:host={$ip};port={$port}", $user, $pass, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+            $output->writeln('<info>MySQL is running on ' . $host . '</info>');
+        } catch (\PDOException $e) {
+            throw new \RuntimeException(
+                "MySQL is not accessible at {$host}. Please start MySQL or check your connection settings. " .
+                "Error: {$e->getMessage()}"
+            );
+        }
+    }
+
+    private function createWorkerDatabases(int $workers, string $cwd, OutputInterface $output): void
+    {
+        $envFile = $cwd . '/tests/.env';
+        $envVars = array_merge($_ENV, (array)Env::envFile($envFile));
+
+        $baseDbName = $envVars['WORDPRESS_DB_NAME'] ?? 'wordpress';
+        $host = $envVars['WORDPRESS_DB_HOST'] ?? '127.0.0.1:2391';
+        $user = $envVars['WORDPRESS_DB_USER'] ?? 'root';
+        $pass = $envVars['WORDPRESS_DB_PASSWORD'] ?? '';
+
+        for ($i = 0; $i < $workers; $i++) {
+            $workerDbName = $baseDbName . '_w' . $i;
+            try {
+                $db = new MysqlDatabase($workerDbName, $user, $pass, $host);
+                $db->drop();
+                $db->create();
+                $output->writeln("<info>Created database {$workerDbName}</info>");
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    "Failed to create worker database {$workerDbName}: {$e->getMessage()}"
+                );
+            }
+        }
+    }
+
+    private function createWorkerOutputDirs(int $workers, string $cwd, OutputInterface $output): void
+    {
+        for ($i = 0; $i < $workers; $i++) {
+            $dir = $cwd . '/var/_output/w' . $i;
+            if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)) {
+                throw new \RuntimeException("Failed to create worker output directory: {$dir}");
+            }
+        }
+    }
+
+    private function teardownWorkers(int $workers, string $cwd, OutputInterface $output): void
+    {
+        $this->killWorkerPhpServers($workers, $cwd, $output);
+        $this->dropWorkerDatabases($workers, $cwd, $output);
+        $this->removeWorkerDirs($workers, $cwd, $output);
+    }
+
+    private function killWorkerPhpServers(int $workers, string $cwd, OutputInterface $output): void
+    {
+        for ($i = 0; $i < $workers; $i++) {
+            $pidFile = $cwd . '/var/_output/w' . $i . '/php-built-in-server.pid';
+            if (!is_file($pidFile)) {
+                continue;
+            }
+            $pid = (int)trim((string)file_get_contents($pidFile));
+            if ($pid <= 0) {
+                continue;
+            }
+            // Kill child processes first (PHP servers have workers)
+            if (function_exists('shell_exec')) {
+                $children = explode("\n", (string)@shell_exec("pgrep -P {$pid}") ?: '');
+                foreach ($children as $child) {
+                    $childPid = (int)trim($child);
+                    if ($childPid > 0) {
+                        @posix_kill($childPid, 15);
+                    }
+                }
+            }
+            @posix_kill($pid, 15);
+            @unlink($pidFile);
+        }
+    }
+
+    private function dropWorkerDatabases(int $workers, string $cwd, OutputInterface $output): void
+    {
+        $envFile = $cwd . '/tests/.env';
+        $envVars = array_merge($_ENV, (array)Env::envFile($envFile));
+
+        $baseDbName = $envVars['WORDPRESS_DB_NAME'] ?? 'wordpress';
+        $host = $envVars['WORDPRESS_DB_HOST'] ?? '127.0.0.1:2391';
+        $user = $envVars['WORDPRESS_DB_USER'] ?? 'root';
+        $pass = $envVars['WORDPRESS_DB_PASSWORD'] ?? '';
+
+        for ($i = 0; $i < $workers; $i++) {
+            $workerDbName = $baseDbName . '_w' . $i;
+            try {
+                $db = new MysqlDatabase($workerDbName, $user, $pass, $host);
+                $db->drop();
+                $output->writeln("<info>Dropped database {$workerDbName}</info>");
+            } catch (\Throwable $e) {
+                $output->writeln("<warning>Failed to drop database {$workerDbName}: {$e->getMessage()}</warning>");
+            }
+        }
+    }
+
+    private function removeWorkerDirs(int $workers, string $cwd, OutputInterface $output): void
+    {
+        for ($i = 0; $i < $workers; $i++) {
+            $dirs = [
+                $cwd . '/var/_output/w' . $i,
+                $cwd . '/var/tmp/w' . $i,
+                $cwd . '/var/tmp/_cache/w' . $i,
+            ];
+
+            foreach ($dirs as $dir) {
+                if (is_dir($dir)) {
+                    $this->removeDir($dir);
+                }
+            }
+        }
+    }
+
+    private function removeDir(string $dir): void
+    {
+        foreach (glob($dir . '/*') ?: [] as $file) {
+            if (is_dir($file)) {
+                $this->removeDir($file);
+            } else {
+                @unlink($file);
+            }
         }
         @rmdir($dir);
     }

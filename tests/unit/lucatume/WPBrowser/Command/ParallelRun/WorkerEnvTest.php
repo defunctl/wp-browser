@@ -16,12 +16,11 @@ class WorkerEnvTest extends Unit
         $env = WorkerEnv::build(0, []);
 
         $this->assertSame('2389', $env['WORDPRESS_LOCALHOST_PORT']);
-        $this->assertSame('2391', $env['WORDPRESS_DB_LOCALHOST_PORT']);
         $this->assertSame('2390', $env['CHROMEDRIVER_PORT']);
         $this->assertSame('var/tmp/w0', $env['TEST_TMP_ROOT_DIR']);
         $this->assertSame('var/tmp/_cache/w0', $env['TEST_CACHE_DIR']);
-        $this->assertSame('var/w0/wordpress', $env['WORDPRESS_ROOT_DIR']);
         $this->assertSame('0', $env['WPBROWSER_WORKER_ID']);
+        $this->assertArrayNotHasKey('WORDPRESS_ROOT_DIR', $env);
     }
 
     public function test_worker_3_shifts_ports_by_stride_times_three(): void
@@ -29,7 +28,6 @@ class WorkerEnvTest extends Unit
         $env = WorkerEnv::build(3, []);
 
         $this->assertSame('2419', $env['WORDPRESS_LOCALHOST_PORT']);
-        $this->assertSame('2421', $env['WORDPRESS_DB_LOCALHOST_PORT']);
         $this->assertSame('2420', $env['CHROMEDRIVER_PORT']);
         $this->assertSame('var/tmp/w3', $env['TEST_TMP_ROOT_DIR']);
         $this->assertSame('3', $env['WPBROWSER_WORKER_ID']);
@@ -42,27 +40,40 @@ class WorkerEnvTest extends Unit
             'WORDPRESS_DOMAIN=localhost:2389',
             'WORDPRESS_SUBDIR_URL=http://localhost:2389/subdir',
             'WORDPRESS_SUBDOMAIN_URL=http://test1.localhost:2389',
+            'WORDPRESS_DB_NAME=wordpress',
             'WORDPRESS_DB_DSN=mysql:host=127.0.0.1;port=2391;dbname=wordpress',
             'WORDPRESS_DB_HOST=127.0.0.1:2391',
             'WORDPRESS_DB_URL=mysql://root:password@127.0.0.1:2391/wordpress',
+            'WORDPRESS_SUBDIR_DB_NAME=test_subdir',
             'WORDPRESS_SUBDIR_DB_DSN=mysql:host=127.0.0.1;port=2391;dbname=test_subdir',
+            'WORDPRESS_SUBDOMAIN_DB_NAME=test_subdomain',
             'WORDPRESS_SUBDOMAIN_DB_DSN=mysql:host=127.0.0.1;port=2391;dbname=test_subdomain',
+            'WORDPRESS_EMPTY_DB_NAME=empty',
             'WORDPRESS_EMPTY_DB_DSN=mysql:host=127.0.0.1;port=2391;dbname=empty',
             '',
         ])]);
 
         $env = WorkerEnv::build(2, [], $tmp . '/.env');
 
+        // HTTP URLs are rewritten per-worker (port changed to per-worker PHP server port)
         $this->assertSame('http://localhost:2409', $env['WORDPRESS_URL']);
         $this->assertSame('localhost:2409', $env['WORDPRESS_DOMAIN']);
         $this->assertSame('http://localhost:2409/subdir', $env['WORDPRESS_SUBDIR_URL']);
         $this->assertSame('http://test1.localhost:2409', $env['WORDPRESS_SUBDOMAIN_URL']);
-        $this->assertSame('mysql:host=127.0.0.1;port=2411;dbname=wordpress', $env['WORDPRESS_DB_DSN']);
-        $this->assertSame('127.0.0.1:2411', $env['WORDPRESS_DB_HOST']);
-        $this->assertSame('mysql://root:password@127.0.0.1:2411/wordpress', $env['WORDPRESS_DB_URL']);
-        $this->assertSame('mysql:host=127.0.0.1;port=2411;dbname=test_subdir', $env['WORDPRESS_SUBDIR_DB_DSN']);
-        $this->assertSame('mysql:host=127.0.0.1;port=2411;dbname=test_subdomain', $env['WORDPRESS_SUBDOMAIN_DB_DSN']);
-        $this->assertSame('mysql:host=127.0.0.1;port=2411;dbname=empty', $env['WORDPRESS_EMPTY_DB_DSN']);
+
+        // Database DSNs: host/port unchanged (shared MySQL), but dbname suffixed per-worker
+        $this->assertSame('mysql:host=127.0.0.1;port=2391;dbname=wordpress_w2', $env['WORDPRESS_DB_DSN']);
+        $this->assertSame('127.0.0.1:2391', $env['WORDPRESS_DB_HOST']);
+        $this->assertSame('mysql://root:password@127.0.0.1:2391/wordpress_w2', $env['WORDPRESS_DB_URL']);
+        $this->assertSame('mysql:host=127.0.0.1;port=2391;dbname=test_subdir_w2', $env['WORDPRESS_SUBDIR_DB_DSN']);
+        $this->assertSame('mysql:host=127.0.0.1;port=2391;dbname=test_subdomain_w2', $env['WORDPRESS_SUBDOMAIN_DB_DSN']);
+        $this->assertSame('mysql:host=127.0.0.1;port=2391;dbname=empty_w2', $env['WORDPRESS_EMPTY_DB_DSN']);
+
+        // Database names are suffixed per-worker
+        $this->assertSame('wordpress_w2', $env['WORDPRESS_DB_NAME']);
+        $this->assertSame('test_subdir_w2', $env['WORDPRESS_SUBDIR_DB_NAME']);
+        $this->assertSame('test_subdomain_w2', $env['WORDPRESS_SUBDOMAIN_DB_NAME']);
+        $this->assertSame('empty_w2', $env['WORDPRESS_EMPTY_DB_NAME']);
     }
 
     public function test_dotenv_values_override_base_env(): void
@@ -125,7 +136,6 @@ class WorkerEnvTest extends Unit
         $this->assertNotEmpty($values);
         $this->assertTrue($this->anyContains($values, 'ChromeDriverController') && $this->anyContains($values, 'port: 2390'));
         $this->assertTrue($this->anyContains($values, 'BuiltInServerController') && $this->anyContains($values, 'port: 2389'));
-        $this->assertTrue($this->anyContains($values, 'MysqlServerController') && $this->anyContains($values, 'port: 2391'));
     }
 
     public function test_overrides_for_worker_shifts_ports_by_stride(): void
@@ -135,7 +145,6 @@ class WorkerEnvTest extends Unit
 
         $this->assertTrue($this->anyContains($values, 'ChromeDriverController') && $this->anyContains($values, 'port: 2420'));
         $this->assertTrue($this->anyContains($values, 'BuiltInServerController') && $this->anyContains($values, 'port: 2419'));
-        $this->assertTrue($this->anyContains($values, 'MysqlServerController') && $this->anyContains($values, 'port: 2421'));
     }
 
     public function test_overrides_are_splattable_cli_tokens(): void
@@ -158,27 +167,23 @@ class WorkerEnvTest extends Unit
         $joined = implode("\n", $values);
         $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\ChromeDriverController', $joined);
         $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\BuiltInServerController', $joined);
-        $this->assertStringContainsString('lucatume\\WPBrowser\\Extension\\MysqlServerController', $joined);
     }
 
     public function test_allocated_ports_override_stride_defaults(): void
     {
         $ports = [
-            'WORDPRESS_LOCALHOST_PORT'    => 55001,
-            'CHROMEDRIVER_PORT'           => 55002,
-            'WORDPRESS_DB_LOCALHOST_PORT' => 55003,
+            'WORDPRESS_LOCALHOST_PORT' => 55001,
+            'CHROMEDRIVER_PORT'        => 55002,
         ];
         $env = WorkerEnv::build(2, [], null, $ports);
 
         $this->assertSame('55001', $env['WORDPRESS_LOCALHOST_PORT']);
         $this->assertSame('55002', $env['CHROMEDRIVER_PORT']);
-        $this->assertSame('55003', $env['WORDPRESS_DB_LOCALHOST_PORT']);
 
         $tokens = WorkerEnv::overridesForWorker(2, $ports);
         $joined = implode("\n", $tokens);
         $this->assertStringContainsString('port: 55001', $joined);
         $this->assertStringContainsString('port: 55002', $joined);
-        $this->assertStringContainsString('port: 55003', $joined);
     }
 
     /**
