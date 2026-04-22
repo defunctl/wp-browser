@@ -62,6 +62,7 @@ class WPTestCaseStrictTest extends Unit
 
     /**
      * @group slow
+     * @group requires-mysql-server
      */
     public function test_will_fail_if_db_connection_closed_during_setup_before_class(): void
     {

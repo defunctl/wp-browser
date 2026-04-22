@@ -17,6 +17,9 @@ use PDOStatement;
 use PHPUnit\Framework\AssertionFailedError;
 use RuntimeException;
 
+/**
+ * @group requires-mysql-server
+ */
 class WPDbTest extends Unit
 {
     use UopzFunctions;

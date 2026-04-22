@@ -281,6 +281,7 @@ class ConfiguredTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_installing_single_site_installation(): void
     {
@@ -307,6 +308,7 @@ class ConfiguredTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_installing_multisite_installation(): void
     {
@@ -333,6 +335,7 @@ class ConfiguredTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_installation_request_fails_with_output(): void
     {
@@ -366,6 +369,7 @@ class ConfiguredTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_installation_request_fails_with_throwable(): void
     {
@@ -860,6 +864,7 @@ class ConfiguredTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_changing_the_db_from_mysql_to_sqlite(): void
     {

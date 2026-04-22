@@ -89,6 +89,7 @@ class PluginProjectTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_provide_information_about_the_failure_to_activate_due_to_error(): void
     {

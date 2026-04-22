@@ -21,6 +21,7 @@ use stdClass;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
+ * @group requires-mysql-server
  */
 class WPCLITest extends Unit
 {

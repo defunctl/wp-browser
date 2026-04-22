@@ -543,6 +543,7 @@ EOT,
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_scaffold_for_single_site_correctly(): void
     {
@@ -625,6 +626,7 @@ EOT;
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_scaffold_for_multi_site_correctly(): void
     {

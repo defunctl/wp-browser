@@ -294,6 +294,7 @@ class InstallationTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_running_wp_cli_command_on_single_installation(): void
     {
@@ -322,6 +323,7 @@ class InstallationTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_running_wp_cli_command_on_multisite_installation(): void
     {
@@ -503,6 +505,7 @@ class InstallationTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_changing_db_from_my_sql_to_sq_lite_but_db_dropin_not_found(): void
     {
@@ -588,6 +591,7 @@ PHP;
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_be_possible_to_change_an_installation_database_from_mysql_to_sqlite(): void
     {

@@ -335,6 +335,7 @@ class ChromedriverInstallerTest extends \Codeception\Test\Unit
      * It should correctly install chromedriver
      *
      * @test
+     * @group requires-chromedriver
      */
     public function should_correctly_install_chromedriver(): void
     {

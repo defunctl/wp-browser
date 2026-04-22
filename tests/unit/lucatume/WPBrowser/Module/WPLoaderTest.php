@@ -351,6 +351,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_read_salts_from_configured_installation(): void
     {
@@ -617,6 +618,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_load_only_and_domain_empty(): void
     {
@@ -649,6 +651,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_load_only_and_word_press_not_installed(): void
     {
@@ -686,6 +689,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_load_word_press_before_suite_if_load_only_w_config_files(): void
     {
@@ -785,6 +789,7 @@ class WPLoaderTest extends Unit
      * @test
      * @dataProvider dbModuleCompatDataProvider
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_not_throw_when_load_only_true_and_using_db_module(
         string $dbModuleName,
@@ -874,6 +879,7 @@ class WPLoaderTest extends Unit
      * @test
      * @dataProvider dbModuleCompatDataProvider
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_not_throw_if_using_db_module_and_load_only_true(
         string $dbModuleName,
@@ -1367,6 +1373,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_correctly_activate_child_theme_in_single_installation(): void
     {
@@ -1439,6 +1446,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_correctly_activate_child_theme_in_multisite_installation(): void
     {
@@ -1816,6 +1824,7 @@ class WPLoaderTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_correctly_load_the_module_on_a_bedrock_installation(): void
     {
@@ -1907,6 +1916,7 @@ PHP
      * @test
      * @dataProvider differentDbNamesProvider
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_correctly_load_with_different_database_names(string $dbName): void
     {
@@ -1951,6 +1961,7 @@ PHP
      * @test
      * @group backup-globals
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_not_backup_globals_by_default(): void
     {
@@ -2015,6 +2026,7 @@ PHP
      * @test
      * @group backup-globals
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_controlling_the_backup_of_global_variables_in_the_wp_test_case(): void
     {
@@ -2262,6 +2274,7 @@ PHP
      * @test
      * @group backup-globals
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_controlling_the_backup_of_static_attributes_in_the_wp_test_case(): void
     {
@@ -2603,6 +2616,7 @@ PHP
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_skip_installation_when_skip_install_is_true(): void
     {
@@ -2802,6 +2816,7 @@ PHP
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_fail_to_activate_when_plugins_generate_unexpected_output(): void
     {
@@ -2858,6 +2873,7 @@ PHP
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_activating_plugins_silently(): void
     {

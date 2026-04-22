@@ -58,6 +58,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_theme_from_arbitrary_location(): void
     {
@@ -252,6 +253,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_theme_from_arbitrary_location_in_multisite(): void
     {
@@ -478,6 +480,7 @@ public function invalidThemeConfigurationDataProvider(): array
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths(): void
     {
@@ -620,6 +623,7 @@ public function invalidThemeConfigurationDataProvider(): array
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths_in_multisite(): void
     {

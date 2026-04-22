@@ -82,6 +82,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_allow_db_operations(): void
     {
@@ -106,6 +107,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_options_operations(): void
     {
@@ -194,6 +196,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_import_database_dumps_correctly(): void
     {
@@ -213,6 +216,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_throw_if_dump_line_execution_fails(): void
     {
@@ -233,6 +237,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_correctly_handle_import_files_using_transactions(): void
     {
@@ -252,6 +257,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_allow_dumping_the_database_contents(): void
     {
@@ -285,6 +291,7 @@ class MysqlDatabaseTest extends Unit
      *
      * @test
      * @group fast
+     * @group requires-mysql-server
      */
     public function should_throw_if_dump_file_cannot_be_exported(): void
     {

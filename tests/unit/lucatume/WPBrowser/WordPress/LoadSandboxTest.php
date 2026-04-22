@@ -22,6 +22,7 @@ use PHPUnit\Framework\Assert;
 
 /**
  * @group slow
+ * @group requires-mysql-server
  */
 class LoadSandboxTest extends Unit
 {

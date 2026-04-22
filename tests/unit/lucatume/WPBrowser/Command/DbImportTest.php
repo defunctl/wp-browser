@@ -70,6 +70,7 @@ class DbImportTest extends \Codeception\Test\Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_installation_db_cannot_be_found(): void
     {
@@ -97,6 +98,7 @@ class DbImportTest extends \Codeception\Test\Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_correctly_import_db(): void
     {

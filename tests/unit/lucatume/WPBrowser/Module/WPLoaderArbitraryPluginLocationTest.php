@@ -23,6 +23,7 @@ use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 // @group isolated-2
 /**
  * @group slow
+ * @group requires-mysql-server
  */
 class WPLoaderArbitraryPluginLocationTest extends Unit
 {

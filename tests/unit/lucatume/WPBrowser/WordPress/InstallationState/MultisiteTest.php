@@ -70,6 +70,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_building_specified_wp_config_php_file_does_not_exist(): void
     {
@@ -102,6 +103,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_build_on_site_not_installed_as_multisite()
     {
@@ -132,6 +134,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_building_on_not_installed_multisite(): void
     {
@@ -166,6 +169,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_scaffold_install_configure_and_convert_to_multisite(): void
     {
@@ -220,6 +224,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_fetching_information_from_the_installation(): void
     {
@@ -271,6 +276,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_db(): void
     {
@@ -304,6 +310,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_site_constants(): void
     {
@@ -363,6 +370,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_site_globals(): void
     {
@@ -400,6 +408,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugins_directory(): void
     {
@@ -430,6 +439,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugin_directory_build_from_wp_content_dir_if_set(): void
     {
@@ -463,6 +473,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugin_directory_build_from_wp_plugin_dir_if_set(): void
     {
@@ -498,6 +509,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugins_directory(): void
     {
@@ -528,6 +540,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugin_directory_build_from_wp_content_dir_if_set(): void
     {
@@ -561,6 +574,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugin_directory_build_from_wp_plugin_dir_if_set(): void
     {
@@ -596,6 +610,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_themes_directory(): void
     {
@@ -631,6 +646,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_themes_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -669,6 +685,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_content_dir(): void
     {
@@ -706,6 +723,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_content_directory_build_from_the_wp_content_if_set(): void
     {
@@ -744,6 +762,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_working_with_options(): void
     {
@@ -776,6 +795,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_execute_a_non_static_closure_in_word_press(): void
     {
@@ -811,6 +831,7 @@ class MultisiteTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_executing_a_closure_in_word_press(): void
     {

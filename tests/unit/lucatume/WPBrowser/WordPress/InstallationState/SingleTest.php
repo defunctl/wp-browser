@@ -50,6 +50,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_specified_wp_config_php_file_is_not_found(): void
     {
@@ -81,6 +82,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_built_on_root_directory_missing_wp_load_php_file(): void
     {
@@ -112,6 +114,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_installation_configured_but_not_installed(): void
     {
@@ -134,6 +137,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_building_on_installed_and_configured_multisite_installation(): void
     {
@@ -165,6 +169,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_install_again(): void
     {
@@ -201,6 +206,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_scaffold(): void
     {
@@ -231,6 +237,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_wp_config_php_file_contents_cannot_be_read_during_multsite_conversion(): void
     {
@@ -263,6 +270,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_the_placeholder_is_not_found_in_the_wp_config_php_file_during_multisite_conversion(
     ): void
@@ -303,6 +311,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_wp_config_php_file_cannot_be_written_during_multisite_conversion(): void
     {
@@ -337,6 +346,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_converting_the_installation_to_multisite_subdir_installation(): void
     {
@@ -366,6 +376,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_converting_the_installation_to_multisite_subdomain_installation(): void
     {
@@ -395,6 +406,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_information_about_the_installation(): void
     {
@@ -446,6 +458,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_db(): void
     {
@@ -475,6 +488,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_site_constants(): void
     {
@@ -523,6 +537,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_getting_the_site_globals(): void
     {
@@ -556,6 +571,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugins_directory(): void
     {
@@ -584,6 +600,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugins_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -614,6 +631,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_plugins_directory_built_from_wp_plugin_dir_if_set(): void
     {
@@ -646,6 +664,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugins_directory(): void
     {
@@ -674,6 +693,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugins_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -704,6 +724,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_mu_plugins_directory_built_from_wp_plugin_dir_if_set(): void
     {
@@ -736,6 +757,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_the_themes_directory(): void
     {
@@ -767,6 +789,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_the_themes_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -799,6 +822,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_content_directory(): void
     {
@@ -830,6 +854,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_return_content_directory_built_from_wp_content_dir_if_set(): void
     {
@@ -862,6 +887,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_working_with_options(): void
     {
@@ -891,6 +917,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_siteurl_cannot_be_fetched_in_constructor(): void
     {
@@ -923,6 +950,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_no_admin_user_can_be_found_while_converting_to_multisite(): void
     {
@@ -956,6 +984,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_siteurl_cannot_be_found_while_converting_to_multisite(): void
     {
@@ -982,6 +1011,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_throw_if_trying_to_execute_non_static_closure_in_word_press(): void
     {
@@ -1015,6 +1045,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_executing_a_closure_in_word_press(): void
     {
@@ -1046,6 +1077,7 @@ class SingleTest extends Unit
      *
      * @test
      * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_setting_the_db(): void
     {

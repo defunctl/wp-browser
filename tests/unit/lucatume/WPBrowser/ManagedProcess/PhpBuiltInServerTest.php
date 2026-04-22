@@ -145,6 +145,7 @@ class PhpBuiltInServerTest extends Unit
      * It should throw if specified port already in use
      *
      * @test
+     * @group requires-server
      */
     public function should_throw_if_specified_port_already_in_use(): void
     {
