@@ -12,9 +12,7 @@ use lucatume\WPBrowser\Command\ParallelRun\ShardPlanner;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerEnv;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
 use lucatume\WPBrowser\ManagedProcess\MysqlServer;
-use lucatume\WPBrowser\Utils\Db;
 use lucatume\WPBrowser\Utils\Env;
-use lucatume\WPBrowser\Utils\Filesystem;
 use lucatume\WPBrowser\WordPress\Database\MysqlDatabase;
 use PDO;
 use PDOException;
@@ -352,6 +350,11 @@ class ParallelRun extends Run implements CustomCommandInterface
         $this->createWorkerOutputDirs($workers, $cwd, $output);
     }
 
+    /**
+     * Managed MySQL auto-started here lingers after the command exits so subsequent runs
+     * reuse it via the probe path. Tear it down externally (e.g. `mysqladmin shutdown`)
+     * or by letting MysqlServerController manage the lifecycle in a long-running suite.
+     */
     private function ensureMysqlStarted(string $cwd, OutputInterface $output): void
     {
         $envFile = $cwd . '/tests/.env';
