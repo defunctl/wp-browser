@@ -13,6 +13,7 @@ use lucatume\WPBrowser\Extension\ChromeDriverController;
 use lucatume\WPBrowser\ManagedProcess\ChromeDriver;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Composer;
+use lucatume\WPBrowser\Utils\Filesystem;
 use stdClass;
 use Symfony\Component\Console\Output\BufferedOutput;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
@@ -27,6 +28,10 @@ class ChromeDriverControllerTest extends Unit
 
     private Output $output;
 
+    private ?string $savedNeedsChromedriverServer = null;
+    private ?string $savedNeedsChromedriverEnv   = null;
+    private string|false $savedNeedsChromedriverGetenv = false;
+
     /**
      * @before
      * @after
@@ -36,6 +41,37 @@ class ChromeDriverControllerTest extends Unit
         $pidFile = ChromeDriver::getPidFile();
         if (is_file($pidFile)) {
             unlink($pidFile);
+        }
+    }
+
+    /**
+     * @before
+     */
+    public function isolateWorkerNeedsChromedriverEnv(): void
+    {
+        $var = WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER;
+        $this->savedNeedsChromedriverServer = array_key_exists($var, $_SERVER) ? (string)$_SERVER[$var] : null;
+        $this->savedNeedsChromedriverEnv    = array_key_exists($var, $_ENV) ? (string)$_ENV[$var] : null;
+        $this->savedNeedsChromedriverGetenv = getenv($var);
+
+        unset($_SERVER[$var], $_ENV[$var]);
+        putenv($var);
+    }
+
+    /**
+     * @after
+     */
+    public function restoreWorkerNeedsChromedriverEnv(): void
+    {
+        $var = WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER;
+        if ($this->savedNeedsChromedriverServer !== null) {
+            $_SERVER[$var] = $this->savedNeedsChromedriverServer;
+        }
+        if ($this->savedNeedsChromedriverEnv !== null) {
+            $_ENV[$var] = $this->savedNeedsChromedriverEnv;
+        }
+        if ($this->savedNeedsChromedriverGetenv !== false) {
+            putenv($var . '=' . $this->savedNeedsChromedriverGetenv);
         }
     }
 
@@ -250,9 +286,11 @@ class ChromeDriverControllerTest extends Unit
 
         $this->assertFileExists(ChromeDriver::getPidFile());
 
+        $expectedPidFile = Filesystem::relativePath(codecept_root_dir(), ChromeDriver::getPidFile());
+
         $this->assertEquals([
             'running' => 'yes',
-            'pidFile' => 'var/_output/chromedriver.pid',
+            'pidFile' => $expectedPidFile,
             'port' => 4444,
         ], $extension->getInfo());
 
@@ -260,7 +298,7 @@ class ChromeDriverControllerTest extends Unit
 
         $this->assertEquals([
             'running' => 'no',
-            'pidFile' => 'var/_output/chromedriver.pid',
+            'pidFile' => $expectedPidFile,
             'port' => 4444,
         ], $extension->getInfo());
     }

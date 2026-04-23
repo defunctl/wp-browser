@@ -13,6 +13,7 @@ use lucatume\WPBrowser\Extension\BuiltInServerController;
 use lucatume\WPBrowser\ManagedProcess\PhpBuiltInServer;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Composer;
+use lucatume\WPBrowser\Utils\Filesystem;
 use lucatume\WPBrowser\Utils\Random;
 use stdClass;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -43,6 +44,41 @@ class BuiltInServerControllerTest extends Unit
     use SnapshotAssertions;
 
     private Output $output;
+
+    private ?string $savedNeedsServerServer = null;
+    private ?string $savedNeedsServerEnv    = null;
+    private string|false $savedNeedsServerGetenv = false;
+
+    /**
+     * @before
+     */
+    public function isolateWorkerNeedsServerEnv(): void
+    {
+        $var = WorkerResourceEnv::ENV_NEEDS_SERVER;
+        $this->savedNeedsServerServer = array_key_exists($var, $_SERVER) ? (string)$_SERVER[$var] : null;
+        $this->savedNeedsServerEnv    = array_key_exists($var, $_ENV) ? (string)$_ENV[$var] : null;
+        $this->savedNeedsServerGetenv = getenv($var);
+
+        unset($_SERVER[$var], $_ENV[$var]);
+        putenv($var);
+    }
+
+    /**
+     * @after
+     */
+    public function restoreWorkerNeedsServerEnv(): void
+    {
+        $var = WorkerResourceEnv::ENV_NEEDS_SERVER;
+        if ($this->savedNeedsServerServer !== null) {
+            $_SERVER[$var] = $this->savedNeedsServerServer;
+        }
+        if ($this->savedNeedsServerEnv !== null) {
+            $_ENV[$var] = $this->savedNeedsServerEnv;
+        }
+        if ($this->savedNeedsServerGetenv !== false) {
+            putenv($var . '=' . $this->savedNeedsServerGetenv);
+        }
+    }
 
     /**
      * @before
@@ -329,7 +365,8 @@ class BuiltInServerControllerTest extends Unit
     {
         $this->assertFileNotExists(PhpBuiltInServer::getPidFile());
 
-        $config = ['docroot' => __DIR__, 'port' => 8923];
+        $port = Random::openLocalhostPort();
+        $config = ['docroot' => __DIR__, 'port' => $port];
         $options = [];
 
         $extension = new BuiltInServerController($config, $options);
@@ -339,13 +376,15 @@ class BuiltInServerControllerTest extends Unit
 
         $this->assertFileExists(PhpBuiltInServer::getPidFile());
 
+        $expectedPidFile = Filesystem::relativePath(codecept_root_dir(), PhpBuiltInServer::getPidFile());
+
         $this->assertEquals([
             'running' => 'yes',
-            'pidFile' => 'var/_output/php-built-in-server.pid',
-            'port' => 8923,
+            'pidFile' => $expectedPidFile,
+            'port' => $port,
             'docroot' => ltrim(str_replace(getcwd(), '', __DIR__),DIRECTORY_SEPARATOR),
             'workers' => 5,
-            'url' => 'http://localhost:8923/',
+            'url' => "http://localhost:{$port}/",
             'env' => [],
         ], $extension->getInfo());
 
@@ -353,11 +392,11 @@ class BuiltInServerControllerTest extends Unit
 
         $this->assertEquals([
             'running' => 'no',
-            'pidFile' => 'var/_output/php-built-in-server.pid',
-            'port' => 8923,
+            'pidFile' => $expectedPidFile,
+            'port' => $port,
             'docroot' => ltrim(str_replace(getcwd(), '', __DIR__), DIRECTORY_SEPARATOR),
             'workers' => 5,
-            'url' => 'http://localhost:8923/',
+            'url' => "http://localhost:{$port}/",
             'env' => [],
         ], $extension->getInfo());
     }
