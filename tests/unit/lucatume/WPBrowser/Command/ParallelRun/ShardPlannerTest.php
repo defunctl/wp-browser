@@ -238,4 +238,28 @@ PHP);
             $planner->needsResources([$f1, $f2])
         );
     }
+
+    public function test_needs_resources_ignores_group_tokens_outside_docblocks(): void
+    {
+        $tmpDir = FS::tmpDir('shard-planner-');
+        $file   = $tmpDir . '/DecoyTest.php';
+        file_put_contents($file, <<<'PHP'
+<?php
+class DecoyTest extends \PHPUnit\Framework\TestCase {
+    public function test_string_literal_does_not_trigger(): void
+    {
+        $tag = '@group requires-server';
+        // @group requires-chromedriver — this is a line comment, not a docblock
+        $_ = $tag;
+    }
+}
+PHP);
+
+        $planner = new ShardPlanner();
+
+        $this->assertSame(
+            ['server' => false, 'chromedriver' => false, 'mysql' => false],
+            $planner->needsResources([$file])
+        );
+    }
 }

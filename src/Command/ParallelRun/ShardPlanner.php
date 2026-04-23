@@ -131,24 +131,34 @@ final class ShardPlanner
     {
         $need = ['server' => false, 'chromedriver' => false, 'mysql' => false];
         foreach ($files as $file) {
-            if (!is_string($file) || $file === '' || !is_file($file)) {
+            if ($file === '' || !is_file($file)) {
                 continue;
             }
             $src = @file_get_contents($file);
             if ($src === false || $src === '') {
                 continue;
             }
-            if (!$need['server'] && preg_match('/@group\s+requires-server\b/', $src)) {
-                $need['server'] = true;
+            $tokens = @token_get_all($src);
+            if (!is_array($tokens)) {
+                continue;
             }
-            if (!$need['chromedriver'] && preg_match('/@group\s+requires-chromedriver\b/', $src)) {
-                $need['chromedriver'] = true;
-            }
-            if (!$need['mysql'] && preg_match('/@group\s+requires-mysql-server\b/', $src)) {
-                $need['mysql'] = true;
-            }
-            if ($need['server'] && $need['chromedriver'] && $need['mysql']) {
-                break;
+            foreach ($tokens as $tok) {
+                if (!is_array($tok) || $tok[0] !== T_DOC_COMMENT) {
+                    continue;
+                }
+                $doc = $tok[1];
+                if (!$need['server'] && preg_match('/@group\s+requires-server\b/', $doc)) {
+                    $need['server'] = true;
+                }
+                if (!$need['chromedriver'] && preg_match('/@group\s+requires-chromedriver\b/', $doc)) {
+                    $need['chromedriver'] = true;
+                }
+                if (!$need['mysql'] && preg_match('/@group\s+requires-mysql-server\b/', $doc)) {
+                    $need['mysql'] = true;
+                }
+                if ($need['server'] && $need['chromedriver'] && $need['mysql']) {
+                    break 2;
+                }
             }
         }
         return $need;
