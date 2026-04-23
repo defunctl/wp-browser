@@ -10,6 +10,7 @@ use lucatume\WPBrowser\Command\ParallelRun\DotAggregator;
 use lucatume\WPBrowser\Command\ParallelRun\PortAllocator;
 use lucatume\WPBrowser\Command\ParallelRun\ShardPlanner;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerEnv;
+use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
 use lucatume\WPBrowser\Utils\Db;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem;
@@ -97,6 +98,11 @@ class ParallelRun extends Run implements CustomCommandInterface
         $eventFiles = [];
         $eventOffsets = [];
 
+        $resourceEnvs = WorkerResourceEnv::build(
+            $shardAssignments,
+            $mode === ShardPlanner::MODE_SHARD
+        );
+
         try {
             /** @var array<int,Process> $running */
             $running = [];
@@ -112,6 +118,10 @@ class ParallelRun extends Run implements CustomCommandInterface
                 $ports = $workerPorts[$i];
                 $env   = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env', $ports);
                 $env['WPBROWSER_PARALLEL_EVENT_FILE'] = $eventFile;
+                $env += $resourceEnvs[$i] ?? [
+                    WorkerResourceEnv::ENV_NEEDS_SERVER       => '1',
+                    WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER => '1',
+                ];
 
                 if ($mode === ShardPlanner::MODE_SHARD) {
                     $shardArgs = ['--shard', "$i/$workers"];
