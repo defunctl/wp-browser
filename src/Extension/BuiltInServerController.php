@@ -17,6 +17,11 @@ class BuiltInServerController extends ServiceExtension
      */
     public function start(OutputInterface $output): void
     {
+        if ($this->isDisabledForWorker()) {
+            $output->writeln('PHP built-in server not needed by this worker; skipping.');
+            return;
+        }
+
         $pidFile = $this->getPidFile();
 
         if ($this->isProcessRunning($pidFile)) {
@@ -151,5 +156,14 @@ class BuiltInServerController extends ServiceExtension
     private function getPidFile(): string
     {
         return PhpBuiltInServer::getPidFile();
+    }
+
+    private function isDisabledForWorker(): bool
+    {
+        $value = $_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']
+            ?? $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']
+            ?? getenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER');
+
+        return $value !== false && $value !== null && (string)$value === '0';
     }
 }

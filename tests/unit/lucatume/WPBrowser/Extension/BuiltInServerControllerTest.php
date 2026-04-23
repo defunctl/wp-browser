@@ -14,6 +14,7 @@ use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Composer;
 use lucatume\WPBrowser\Utils\Random;
 use stdClass;
+use Symfony\Component\Console\Output\BufferedOutput;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 class PhpBuiltInServerMock extends PhpBuiltInServer
@@ -358,5 +359,30 @@ class BuiltInServerControllerTest extends Unit
             'url' => 'http://localhost:8923/',
             'env' => [],
         ], $extension->getInfo());
+    }
+
+    public function test_start_skips_when_worker_marked_as_not_needing_server(): void
+    {
+        $_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER'] = '0';
+        $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']    = '0';
+        putenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER=0');
+
+        try {
+            $controller = new BuiltInServerController(
+                ['docroot' => __DIR__],
+                []
+            );
+            $output = new BufferedOutput();
+            $controller->start($output);
+
+            $this->assertStringContainsString(
+                'PHP built-in server not needed by this worker; skipping.',
+                $output->fetch()
+            );
+            $this->assertFalse(is_file(PhpBuiltInServer::getPidFile()));
+        } finally {
+            unset($_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER'], $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']);
+            putenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER');
+        }
     }
 }
