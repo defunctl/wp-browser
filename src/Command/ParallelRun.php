@@ -354,21 +354,62 @@ class ParallelRun extends Run implements CustomCommandInterface
         $user = $envVars['WORDPRESS_DB_USER'] ?? 'root';
         $pass = $envVars['WORDPRESS_DB_PASSWORD'] ?? '';
 
-        // Parse host:port
-        $parts = explode(':', $host);
-        $ip = $parts[0] ?? '127.0.0.1';
-        $port = (int)($parts[1] ?? 3306);
+        $parts = explode(':', (string)$host);
+        $ip    = $parts[0] !== '' ? $parts[0] : '127.0.0.1';
+        $port  = (int)($parts[1] ?? 3306);
+
+        if ($this->probeMysql($ip, $port, (string)$user, (string)$pass)) {
+            $output->writeln('<info>MySQL is running on ' . $host . '</info>');
+            return;
+        }
+
+        $output->writeln('<info>MySQL not reachable at ' . $host . '; starting a managed instance...</info>');
+
+        $baseDbName = (string)($envVars['WORDPRESS_DB_NAME'] ?? 'wordpress');
+        $dataDir    = $cwd . '/var/_output/_mysql_server';
+        if (!is_dir($dataDir) && !mkdir($dataDir, 0777, true) && !is_dir($dataDir)) {
+            throw new \RuntimeException("Failed to create MySQL data directory: {$dataDir}");
+        }
 
         try {
-            $pdo = new \PDO("mysql:host={$ip};port={$port}", $user, $pass, [
+            $mysql = new \lucatume\WPBrowser\ManagedProcess\MysqlServer(
+                $dataDir,
+                $port,
+                $baseDbName,
+                $user !== '' ? (string)$user : 'root',
+                is_string($pass) ? $pass : ''
+            );
+            $mysql->setOutput($output);
+            $mysql->start();
+        } catch (\Throwable $e) {
+            throw new \RuntimeException(
+                "Could not start managed MySQL server on port {$port}: {$e->getMessage()}",
+                0,
+                $e
+            );
+        }
+
+        $deadline = microtime(true) + 30.0;
+        while (microtime(true) < $deadline) {
+            if ($this->probeMysql($ip, $port, (string)$user, (string)$pass)) {
+                $output->writeln('<info>MySQL ready on ' . $host . '</info>');
+                return;
+            }
+            usleep(250_000);
+        }
+
+        throw new \RuntimeException("Managed MySQL server on port {$port} never became reachable.");
+    }
+
+    private function probeMysql(string $ip, int $port, string $user, string $pass): bool
+    {
+        try {
+            new \PDO("mysql:host={$ip};port={$port}", $user, $pass, [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             ]);
-            $output->writeln('<info>MySQL is running on ' . $host . '</info>');
-        } catch (\PDOException $e) {
-            throw new \RuntimeException(
-                "MySQL is not accessible at {$host}. Please start MySQL or check your connection settings. " .
-                "Error: {$e->getMessage()}"
-            );
+            return true;
+        } catch (\PDOException) {
+            return false;
         }
     }
 
