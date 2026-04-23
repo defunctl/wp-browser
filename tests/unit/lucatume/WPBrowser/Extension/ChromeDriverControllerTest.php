@@ -8,11 +8,13 @@ use Codeception\Exception\ExtensionException;
 use Codeception\Lib\Console\Output;
 use Codeception\Suite;
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
 use lucatume\WPBrowser\Extension\ChromeDriverController;
 use lucatume\WPBrowser\ManagedProcess\ChromeDriver;
 use lucatume\WPBrowser\Traits\UopzFunctions;
 use lucatume\WPBrowser\Utils\Composer;
 use stdClass;
+use Symfony\Component\Console\Output\BufferedOutput;
 use tad\Codeception\SnapshotAssertions\SnapshotAssertions;
 
 /**
@@ -305,5 +307,27 @@ class ChromeDriverControllerTest extends Unit
         $this->expectExceptionMessage('The "binary" configuration option must be an executable file.');
 
         $extension->onModuleInit($this->make(SuiteEvent::class, ['getSuite' => $mockSuite]));
+    }
+
+    public function test_start_skips_when_worker_marked_as_not_needing_chromedriver(): void
+    {
+        $_SERVER[WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER] = '0';
+        $_ENV[WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]    = '0';
+        putenv(WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER . '=0');
+
+        try {
+            $controller = new ChromeDriverController([], []);
+            $output = new BufferedOutput();
+            $controller->start($output);
+
+            $this->assertStringContainsString(
+                'ChromeDriver not needed by this worker; skipping.',
+                $output->fetch()
+            );
+            $this->assertFileDoesNotExist(ChromeDriver::getPidFile());
+        } finally {
+            unset($_SERVER[WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER], $_ENV[WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
+            putenv(WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER);
+        }
     }
 }
