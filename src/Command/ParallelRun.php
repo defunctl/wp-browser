@@ -11,17 +11,24 @@ use lucatume\WPBrowser\Command\ParallelRun\PortAllocator;
 use lucatume\WPBrowser\Command\ParallelRun\ShardPlanner;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerEnv;
 use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
+use lucatume\WPBrowser\ManagedProcess\MysqlServer;
 use lucatume\WPBrowser\Utils\Db;
 use lucatume\WPBrowser\Utils\Env;
 use lucatume\WPBrowser\Utils\Filesystem;
 use lucatume\WPBrowser\WordPress\Database\MysqlDatabase;
+use PDO;
+use PDOException;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class ParallelRun extends Run implements CustomCommandInterface
 {
+    private const MYSQL_READY_TIMEOUT_SECONDS = 30.0;
+
     public static function getCommandName(): string
     {
         return 'parallel-run';
@@ -340,12 +347,12 @@ class ParallelRun extends Run implements CustomCommandInterface
 
     private function setupWorkers(int $workers, string $cwd, OutputInterface $output): void
     {
-        $this->ensureMysqlReachable($cwd, $output);
+        $this->ensureMysqlStarted($cwd, $output);
         $this->createWorkerDatabases($workers, $cwd, $output);
         $this->createWorkerOutputDirs($workers, $cwd, $output);
     }
 
-    private function ensureMysqlReachable(string $cwd, OutputInterface $output): void
+    private function ensureMysqlStarted(string $cwd, OutputInterface $output): void
     {
         $envFile = $cwd . '/tests/.env';
         $envVars = array_merge($_ENV, (array)Env::envFile($envFile));
@@ -368,11 +375,11 @@ class ParallelRun extends Run implements CustomCommandInterface
         $baseDbName = (string)($envVars['WORDPRESS_DB_NAME'] ?? 'wordpress');
         $dataDir    = $cwd . '/var/_output/_mysql_server';
         if (!is_dir($dataDir) && !mkdir($dataDir, 0777, true) && !is_dir($dataDir)) {
-            throw new \RuntimeException("Failed to create MySQL data directory: {$dataDir}");
+            throw new RuntimeException("Failed to create MySQL data directory: {$dataDir}");
         }
 
         try {
-            $mysql = new \lucatume\WPBrowser\ManagedProcess\MysqlServer(
+            $mysql = new MysqlServer(
                 $dataDir,
                 $port,
                 $baseDbName,
@@ -381,15 +388,15 @@ class ParallelRun extends Run implements CustomCommandInterface
             );
             $mysql->setOutput($output);
             $mysql->start();
-        } catch (\Throwable $e) {
-            throw new \RuntimeException(
+        } catch (Throwable $e) {
+            throw new RuntimeException(
                 "Could not start managed MySQL server on port {$port}: {$e->getMessage()}",
                 0,
                 $e
             );
         }
 
-        $deadline = microtime(true) + 30.0;
+        $deadline = microtime(true) + self::MYSQL_READY_TIMEOUT_SECONDS;
         while (microtime(true) < $deadline) {
             if ($this->probeMysql($ip, $port, (string)$user, (string)$pass)) {
                 $output->writeln('<info>MySQL ready on ' . $host . '</info>');
@@ -398,17 +405,21 @@ class ParallelRun extends Run implements CustomCommandInterface
             usleep(250_000);
         }
 
-        throw new \RuntimeException("Managed MySQL server on port {$port} never became reachable.");
+        throw new RuntimeException(sprintf(
+            'Managed MySQL server on port %d did not become reachable within %d seconds.',
+            $port,
+            (int)self::MYSQL_READY_TIMEOUT_SECONDS
+        ));
     }
 
     private function probeMysql(string $ip, int $port, string $user, string $pass): bool
     {
         try {
-            new \PDO("mysql:host={$ip};port={$port}", $user, $pass, [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            new PDO("mysql:host={$ip};port={$port}", $user, $pass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
             return true;
-        } catch (\PDOException) {
+        } catch (PDOException) {
             return false;
         }
     }
