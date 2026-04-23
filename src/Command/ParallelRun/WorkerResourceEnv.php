@@ -20,20 +20,20 @@ final class WorkerResourceEnv
     /**
      * Build per-worker env var map from shard file assignments.
      *
+     * Returns only workers whose files are known. The ParallelRun caller is
+     * responsible for supplying fail-safe defaults (both flags = "1") for any
+     * worker not present in the result, e.g. when the shard planner delegates
+     * file distribution to Codeception's own --shard mode.
+     *
      * @param array<int, array{files: string[], weight: float}> $shardAssignments 1-indexed
-     * @return array<int, array<string,string>> 1-indexed, each inner array contains ENV_NEEDS_* => "0"|"1"
+     * @return array<int, array<string,string>>
      */
-    public static function build(array $shardAssignments, bool $isShardMode): array
+    public static function build(array $shardAssignments): array
     {
         $planner = new ShardPlanner();
         $out = [];
         foreach ($shardAssignments as $i => $shard) {
-            if ($isShardMode) {
-                $need = ['server' => true, 'chromedriver' => true, 'mysql' => true];
-            } else {
-                $files = $shard['files'] ?? [];
-                $need  = $planner->needsResources($files);
-            }
+            $need = $planner->needsResources($shard['files'] ?? []);
             $out[$i] = [
                 self::ENV_NEEDS_SERVER       => $need['server'] ? '1' : '0',
                 self::ENV_NEEDS_CHROMEDRIVER => $need['chromedriver'] ? '1' : '0',

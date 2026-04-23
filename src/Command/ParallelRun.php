@@ -98,10 +98,7 @@ class ParallelRun extends Run implements CustomCommandInterface
         $eventFiles = [];
         $eventOffsets = [];
 
-        $resourceEnvs = WorkerResourceEnv::build(
-            $shardAssignments,
-            $mode === ShardPlanner::MODE_SHARD
-        );
+        $resourceEnvs = WorkerResourceEnv::build($shardAssignments);
 
         try {
             /** @var array<int,Process> $running */

@@ -31,7 +31,7 @@ PHP);
             2 => ['files' => [$plainFile],  'weight' => 1.0],
         ];
 
-        $envs = WorkerResourceEnv::build($shards, false);
+        $envs = WorkerResourceEnv::build($shards);
 
         $this->assertSame('1', $envs[1][WorkerResourceEnv::ENV_NEEDS_SERVER]);
         $this->assertSame('0', $envs[1][WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
@@ -39,18 +39,23 @@ PHP);
         $this->assertSame('0', $envs[2][WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
     }
 
-    public function test_build_defaults_both_flags_to_one_in_shard_mode(): void
+    public function test_build_returns_empty_when_given_no_shard_assignments(): void
+    {
+        $this->assertSame([], WorkerResourceEnv::build([]));
+    }
+
+    public function test_build_with_files_missing_marks_everything_off(): void
     {
         $shards = [
             1 => ['files' => [], 'weight' => 0.0],
             2 => ['files' => [], 'weight' => 0.0],
         ];
 
-        $envs = WorkerResourceEnv::build($shards, true);
+        $envs = WorkerResourceEnv::build($shards);
 
         foreach ([1, 2] as $i) {
-            $this->assertSame('1', $envs[$i][WorkerResourceEnv::ENV_NEEDS_SERVER]);
-            $this->assertSame('1', $envs[$i][WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
+            $this->assertSame('0', $envs[$i][WorkerResourceEnv::ENV_NEEDS_SERVER]);
+            $this->assertSame('0', $envs[$i][WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
         }
     }
 
@@ -68,7 +73,7 @@ PHP);
 
         $shards = [1 => ['files' => [$cdFile], 'weight' => 1.0]];
 
-        $envs = WorkerResourceEnv::build($shards, false);
+        $envs = WorkerResourceEnv::build($shards);
 
         $this->assertSame('0', $envs[1][WorkerResourceEnv::ENV_NEEDS_SERVER]);
         $this->assertSame('1', $envs[1][WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER]);
