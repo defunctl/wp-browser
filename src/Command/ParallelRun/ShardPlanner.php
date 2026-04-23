@@ -120,6 +120,40 @@ final class ShardPlanner
         return $shards;
     }
 
+    /**
+     * Return which external resources are referenced by the given set of
+     * test files via their @group annotations.
+     *
+     * @param string[] $files
+     * @return array{server: bool, chromedriver: bool, mysql: bool}
+     */
+    public function needsResources(array $files): array
+    {
+        $need = ['server' => false, 'chromedriver' => false, 'mysql' => false];
+        foreach ($files as $file) {
+            if (!is_string($file) || $file === '' || !is_file($file)) {
+                continue;
+            }
+            $src = @file_get_contents($file);
+            if ($src === false || $src === '') {
+                continue;
+            }
+            if (!$need['server'] && preg_match('/@group\s+requires-server\b/', $src)) {
+                $need['server'] = true;
+            }
+            if (!$need['chromedriver'] && preg_match('/@group\s+requires-chromedriver\b/', $src)) {
+                $need['chromedriver'] = true;
+            }
+            if (!$need['mysql'] && preg_match('/@group\s+requires-mysql-server\b/', $src)) {
+                $need['mysql'] = true;
+            }
+            if ($need['server'] && $need['chromedriver'] && $need['mysql']) {
+                break;
+            }
+        }
+        return $need;
+    }
+
     private function weighFile(string $path): float
     {
         $src = @file_get_contents($path);

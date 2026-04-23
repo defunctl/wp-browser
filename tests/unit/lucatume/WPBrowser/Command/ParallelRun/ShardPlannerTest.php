@@ -167,4 +167,75 @@ PHP);
         sort($allFiles);
         $this->assertSame(['a', 'b'], $allFiles);
     }
+
+    public function test_needs_resources_detects_server_tag_at_method_level(): void
+    {
+        $tmpDir = FS::tmpDir('shard-planner-');
+        $file   = $tmpDir . '/AlphaTest.php';
+        file_put_contents($file, <<<'PHP'
+<?php
+class AlphaTest extends \PHPUnit\Framework\TestCase {
+    /**
+     * @group requires-server
+     */
+    public function test_hits_server(): void {}
+    public function test_plain(): void {}
+}
+PHP);
+
+        $planner = new ShardPlanner();
+
+        $this->assertSame(
+            ['server' => true, 'chromedriver' => false, 'mysql' => false],
+            $planner->needsResources([$file])
+        );
+    }
+
+    public function test_needs_resources_detects_chromedriver_tag_at_class_level(): void
+    {
+        $tmpDir = FS::tmpDir('shard-planner-');
+        $file   = $tmpDir . '/BravoTest.php';
+        file_put_contents($file, <<<'PHP'
+<?php
+/**
+ * @group requires-chromedriver
+ */
+class BravoTest extends \PHPUnit\Framework\TestCase {
+    public function test_a(): void {}
+}
+PHP);
+
+        $planner = new ShardPlanner();
+
+        $this->assertSame(
+            ['server' => false, 'chromedriver' => true, 'mysql' => false],
+            $planner->needsResources([$file])
+        );
+    }
+
+    public function test_needs_resources_returns_all_false_for_empty_file_list(): void
+    {
+        $planner = new ShardPlanner();
+
+        $this->assertSame(
+            ['server' => false, 'chromedriver' => false, 'mysql' => false],
+            $planner->needsResources([])
+        );
+    }
+
+    public function test_needs_resources_unions_across_files(): void
+    {
+        $tmpDir = FS::tmpDir('shard-planner-');
+        $f1 = $tmpDir . '/OneTest.php';
+        $f2 = $tmpDir . '/TwoTest.php';
+        file_put_contents($f1, '<?php /** @group requires-server */ class OneTest {}');
+        file_put_contents($f2, '<?php /** @group requires-mysql-server */ class TwoTest {}');
+
+        $planner = new ShardPlanner();
+
+        $this->assertSame(
+            ['server' => true, 'chromedriver' => false, 'mysql' => true],
+            $planner->needsResources([$f1, $f2])
+        );
+    }
 }
