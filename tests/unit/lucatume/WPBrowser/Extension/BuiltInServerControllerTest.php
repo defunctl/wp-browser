@@ -8,6 +8,7 @@ use Codeception\Exception\ExtensionException;
 use Codeception\Lib\Console\Output;
 use Codeception\Suite;
 use Codeception\Test\Unit;
+use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
 use lucatume\WPBrowser\Extension\BuiltInServerController;
 use lucatume\WPBrowser\ManagedProcess\PhpBuiltInServer;
 use lucatume\WPBrowser\Traits\UopzFunctions;
@@ -363,9 +364,9 @@ class BuiltInServerControllerTest extends Unit
 
     public function test_start_skips_when_worker_marked_as_not_needing_server(): void
     {
-        $_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER'] = '0';
-        $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']    = '0';
-        putenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER=0');
+        $_SERVER[WorkerResourceEnv::ENV_NEEDS_SERVER] = '0';
+        $_ENV[WorkerResourceEnv::ENV_NEEDS_SERVER]    = '0';
+        putenv(WorkerResourceEnv::ENV_NEEDS_SERVER . '=0');
 
         try {
             $controller = new BuiltInServerController(
@@ -379,10 +380,10 @@ class BuiltInServerControllerTest extends Unit
                 'PHP built-in server not needed by this worker; skipping.',
                 $output->fetch()
             );
-            $this->assertFalse(is_file(PhpBuiltInServer::getPidFile()));
+            $this->assertFileDoesNotExist(PhpBuiltInServer::getPidFile());
         } finally {
-            unset($_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER'], $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']);
-            putenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER');
+            unset($_SERVER[WorkerResourceEnv::ENV_NEEDS_SERVER], $_ENV[WorkerResourceEnv::ENV_NEEDS_SERVER]);
+            putenv(WorkerResourceEnv::ENV_NEEDS_SERVER);
         }
     }
 }

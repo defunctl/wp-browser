@@ -3,6 +3,7 @@
 namespace lucatume\WPBrowser\Extension;
 
 use Codeception\Exception\ExtensionException;
+use lucatume\WPBrowser\Command\ParallelRun\WorkerResourceEnv;
 use lucatume\WPBrowser\ManagedProcess\PhpBuiltInServer;
 use lucatume\WPBrowser\Utils\Arr;
 use lucatume\WPBrowser\Utils\Filesystem;
@@ -17,7 +18,7 @@ class BuiltInServerController extends ServiceExtension
      */
     public function start(OutputInterface $output): void
     {
-        if ($this->isDisabledForWorker()) {
+        if (WorkerResourceEnv::isDisabled(WorkerResourceEnv::ENV_NEEDS_SERVER)) {
             $output->writeln('PHP built-in server not needed by this worker; skipping.');
             return;
         }
@@ -156,14 +157,5 @@ class BuiltInServerController extends ServiceExtension
     private function getPidFile(): string
     {
         return PhpBuiltInServer::getPidFile();
-    }
-
-    private function isDisabledForWorker(): bool
-    {
-        $value = $_SERVER['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']
-            ?? $_ENV['WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER']
-            ?? getenv('WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER');
-
-        return $value !== false && $value !== null && (string)$value === '0';
     }
 }
