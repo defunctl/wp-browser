@@ -87,8 +87,10 @@ class ParallelWorkerReporterTest extends Unit
             '--no-artifacts',
         ];
         $env = array_merge([
-            'PATH' => getenv('PATH') ?: '/usr/bin:/bin',
-            'HOME' => getenv('HOME') ?: '/tmp',
+            'PATH'                          => getenv('PATH') ?: '/usr/bin:/bin',
+            'HOME'                          => getenv('HOME') ?: '/tmp',
+            'WPBROWSER_PARALLEL_EVENT_FILE' => '',
+            'WPBROWSER_PARALLEL_LOG_FILE'   => '',
         ], $extraEnv);
 
         $process = new Process($cmd, $fixtureRoot, $env, null, 60);

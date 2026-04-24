@@ -22,16 +22,27 @@ class ParallelWorkerReporter extends Extension
     /** @var resource|null */
     private $stream = null;
 
+    /** @var resource|null */
+    private $logStream = null;
+
     public function _initialize(): void
     {
         $this->_reconfigure(['settings' => ['silent' => true]]);
+
         $path = getenv('WPBROWSER_PARALLEL_EVENT_FILE');
-        if ($path === false || $path === '') {
-            return;
+        if ($path !== false && $path !== '') {
+            $handle = @fopen($path, 'ab');
+            if ($handle !== false) {
+                $this->stream = $handle;
+            }
         }
-        $handle = @fopen($path, 'ab');
-        if ($handle !== false) {
-            $this->stream = $handle;
+
+        $logPath = getenv('WPBROWSER_PARALLEL_LOG_FILE');
+        if ($logPath !== false && $logPath !== '') {
+            $handle = @fopen($logPath, 'ab');
+            if ($handle !== false) {
+                $this->logStream = $handle;
+            }
         }
     }
 
@@ -43,21 +54,25 @@ class ParallelWorkerReporter extends Extension
     public function onFail(FailEvent $event): void
     {
         $this->emit('F');
+        $this->log('[FAIL]', $event);
     }
 
     public function onError(FailEvent $event): void
     {
         $this->emit('E');
+        $this->log('[ERROR]', $event);
     }
 
-    public function onSkipped(): void
+    public function onSkipped(FailEvent $event): void
     {
         $this->emit('S');
+        $this->log('[SKIP]', $event);
     }
 
-    public function onIncomplete(): void
+    public function onIncomplete(FailEvent $event): void
     {
         $this->emit('I');
+        $this->log('[INCOMPLETE]', $event);
     }
 
     public function onWarning(): void
@@ -76,5 +91,16 @@ class ParallelWorkerReporter extends Extension
             fwrite($this->stream, $char);
             fflush($this->stream);
         }
+    }
+
+    private function log(string $prefix, FailEvent $event): void
+    {
+        if ($this->logStream === null) {
+            return;
+        }
+        $name    = $event->getTest()->toString();
+        $message = $event->getFail()->getMessage();
+        fwrite($this->logStream, sprintf("%s %s\n  %s\n\n", $prefix, $name, $message));
+        fflush($this->logStream);
     }
 }

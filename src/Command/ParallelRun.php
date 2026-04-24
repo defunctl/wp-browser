@@ -102,6 +102,7 @@ class ParallelRun extends Run implements CustomCommandInterface
         $failed = false;
         $eventFiles = [];
         $eventOffsets = [];
+        $logFiles = [];
 
         $resourceEnvs = WorkerResourceEnv::build($shardAssignments);
 
@@ -114,12 +115,16 @@ class ParallelRun extends Run implements CustomCommandInterface
                 }
                 $xmlPath   = sprintf('%s/shard-%d.xml', $reportDir, $i);
                 $eventFile = sprintf('%s/events-%d.bin', $reportDir, $i);
+                $logFile   = sprintf('%s/log-%d.txt', $reportDir, $i);
                 touch($eventFile);
+                touch($logFile);
                 $eventFiles[$i]   = $eventFile;
                 $eventOffsets[$i] = 0;
+                $logFiles[$i]     = $logFile;
                 $ports = $workerPorts[$i];
                 $env   = WorkerEnv::build($i - 1, $_ENV, getcwd() . '/tests/.env', $ports);
                 $env['WPBROWSER_PARALLEL_EVENT_FILE'] = $eventFile;
+                $env['WPBROWSER_PARALLEL_LOG_FILE']   = $logFile;
                 $env += $resourceEnvs[$i] ?? [
                     WorkerResourceEnv::ENV_NEEDS_SERVER       => '1',
                     WorkerResourceEnv::ENV_NEEDS_CHROMEDRIVER => '1',
@@ -180,6 +185,15 @@ class ParallelRun extends Run implements CustomCommandInterface
             foreach ($eventFiles as $i => $file) {
                 $this->drainEvents($file, $eventOffsets, $i, $aggregator);
                 $aggregator->mergeXml(sprintf('%s/shard-%d.xml', $reportDir, $i));
+            }
+
+            foreach ($logFiles as $i => $logFile) {
+                $content = trim((string)file_get_contents($logFile));
+                if ($content !== '') {
+                    $output->writeln('');
+                    $output->writeln(sprintf('<comment>--- Worker %d ---</comment>', $i));
+                    $output->writeln($content);
+                }
             }
 
             $aggregator->flushSummary(microtime(true) - $start);
