@@ -490,6 +490,10 @@ class Filesystem
     ): string {
         if ($tmpRootDir === null) {
             $tmpRootDir = Env::get('TEST_TMP_ROOT_DIR') ?? codecept_output_dir('tmp');
+            $workerId = Env::get('WPBROWSER_WORKER_ID');
+            if ($workerId !== null && $workerId !== false && $workerId !== '') {
+                $tmpRootDir = rtrim($tmpRootDir, '\\/') . '/w' . $workerId;
+            }
             if (!is_dir($tmpRootDir)) {
                 $tmpRootDir = self::mkdirp($tmpRootDir, [], 0777);
             }
@@ -573,14 +577,24 @@ class Filesystem
     {
         $envCacheDir = Env::get('TEST_CACHE_DIR');
         if (!empty($envCacheDir)) {
-            return rtrim($envCacheDir, '\\/');
-        }
-        try {
-            return codecept_output_dir('cache');
-        } catch (Exception) {
+            $base = rtrim($envCacheDir, '\\/');
+        } else {
+            try {
+                $base = codecept_output_dir('cache');
+            } catch (Exception) {
+                $base = sys_get_temp_dir();
+            }
         }
 
-        return sys_get_temp_dir();
+        // Codeception's params loader (phpdotenv mutable repository) overwrites TEST_CACHE_DIR
+        // back to the value in tests/.env, so worker-specific paths set by ParallelRun cannot
+        // survive there. WPBROWSER_WORKER_ID is not in tests/.env and stays intact.
+        $workerId = Env::get('WPBROWSER_WORKER_ID');
+        if ($workerId !== null && $workerId !== false && $workerId !== '') {
+            return $base . '/w' . $workerId;
+        }
+
+        return $base;
     }
 
     private static function symfonyFilesystem(): SymfonyFilesystem

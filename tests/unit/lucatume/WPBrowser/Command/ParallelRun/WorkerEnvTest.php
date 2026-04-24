@@ -11,14 +11,14 @@ use lucatume\WPBrowser\Utils\Filesystem as FS;
  */
 class WorkerEnvTest extends Unit
 {
-    public function test_worker_0_keeps_base_ports_and_applies_suffix(): void
+    public function test_worker_0_keeps_base_ports_and_exposes_id(): void
     {
         $env = WorkerEnv::build(0, []);
 
         $this->assertSame('2389', $env['WORDPRESS_LOCALHOST_PORT']);
         $this->assertSame('2390', $env['CHROMEDRIVER_PORT']);
-        $this->assertSame('var/tmp/w0', $env['TEST_TMP_ROOT_DIR']);
-        $this->assertSame('var/tmp/_cache/w0', $env['TEST_CACHE_DIR']);
+        $this->assertSame('var/tmp', $env['TEST_TMP_ROOT_DIR']);
+        $this->assertSame('var/tmp/_cache', $env['TEST_CACHE_DIR']);
         $this->assertSame('0', $env['WPBROWSER_WORKER_ID']);
         $this->assertArrayNotHasKey('WORDPRESS_ROOT_DIR', $env);
     }
@@ -29,7 +29,7 @@ class WorkerEnvTest extends Unit
 
         $this->assertSame('2419', $env['WORDPRESS_LOCALHOST_PORT']);
         $this->assertSame('2420', $env['CHROMEDRIVER_PORT']);
-        $this->assertSame('var/tmp/w3', $env['TEST_TMP_ROOT_DIR']);
+        $this->assertSame('var/tmp', $env['TEST_TMP_ROOT_DIR']);
         $this->assertSame('3', $env['WPBROWSER_WORKER_ID']);
     }
 
@@ -117,15 +117,16 @@ class WorkerEnvTest extends Unit
         $this->assertArrayNotHasKey('OBJECT', $env);
     }
 
-    public function test_tmp_and_cache_dirs_suffix_even_if_base_env_provides_them(): void
+    public function test_tmp_and_cache_dirs_keep_base_value_from_env(): void
     {
         $env = WorkerEnv::build(2, [
             'TEST_TMP_ROOT_DIR' => '/custom/tmp',
             'TEST_CACHE_DIR'    => '/custom/cache',
         ]);
 
-        $this->assertSame('/custom/tmp/w2', $env['TEST_TMP_ROOT_DIR']);
-        $this->assertSame('/custom/cache/w2', $env['TEST_CACHE_DIR']);
+        $this->assertSame('/custom/tmp', $env['TEST_TMP_ROOT_DIR']);
+        $this->assertSame('/custom/cache', $env['TEST_CACHE_DIR']);
+        $this->assertSame('2', $env['WPBROWSER_WORKER_ID']);
     }
 
     public function test_overrides_for_worker_0_uses_base_ports(): void

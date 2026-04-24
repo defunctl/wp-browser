@@ -99,9 +99,8 @@ final class WorkerEnv
             ) ?? $env['WORDPRESS_DB_URL'];
         }
 
-        $suffix = "w{$workerIndex}";
-        $env['TEST_TMP_ROOT_DIR']   = ($env['TEST_TMP_ROOT_DIR']  ?? 'var/tmp')        . "/{$suffix}";
-        $env['TEST_CACHE_DIR']      = ($env['TEST_CACHE_DIR']     ?? 'var/tmp/_cache') . "/{$suffix}";
+        $env['TEST_TMP_ROOT_DIR']   ??= 'var/tmp';
+        $env['TEST_CACHE_DIR']      ??= 'var/tmp/_cache';
         $env['WPBROWSER_WORKER_ID'] = (string)$workerIndex;
 
         return $env;
