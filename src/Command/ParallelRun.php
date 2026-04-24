@@ -415,6 +415,7 @@ class ParallelRun extends Run implements CustomCommandInterface
 
         $deadline = microtime(true) + self::MYSQL_READY_TIMEOUT_SECONDS;
         while (microtime(true) < $deadline) {
+            // @phpstan-ignore-next-line MySQL state changes after start; false-positive from line 385 flow
             if ($this->probeMysql($ip, $port, (string)$user, (string)$pass)) {
                 $output->writeln('<info>MySQL ready on ' . $host . '</info>');
                 return;
