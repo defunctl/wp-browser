@@ -2,6 +2,9 @@
 
 namespace lucatume\WPBrowser\Command\ParallelRun;
 
+/**
+ * @internal
+ */
 final class WorkerResourceEnv
 {
     public const ENV_NEEDS_SERVER       = 'WPBROWSER_PARALLEL_WORKER_NEEDS_SERVER';

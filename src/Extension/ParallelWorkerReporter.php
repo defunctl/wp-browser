@@ -6,6 +6,9 @@ use Codeception\Event\FailEvent;
 use Codeception\Events;
 use Codeception\Extension;
 
+/**
+ * @internal
+ */
 class ParallelWorkerReporter extends Extension
 {
     /** @var array<string,string> */

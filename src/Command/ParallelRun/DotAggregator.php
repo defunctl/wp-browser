@@ -4,6 +4,9 @@ namespace lucatume\WPBrowser\Command\ParallelRun;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @internal
+ */
 final class DotAggregator
 {
     private const DOT_CHARS = ['.', 'F', 'E', 'S', 'I', 'W', 'U'];

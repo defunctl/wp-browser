@@ -23,6 +23,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
+/**
+ * @internal
+ */
 class ParallelRun extends Run implements CustomCommandInterface
 {
     private const MYSQL_READY_TIMEOUT_SECONDS = 30.0;

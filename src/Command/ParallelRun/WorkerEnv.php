@@ -4,6 +4,9 @@ namespace lucatume\WPBrowser\Command\ParallelRun;
 
 use lucatume\WPBrowser\Utils\Env;
 
+/**
+ * @internal
+ */
 final class WorkerEnv
 {
     public const PORT_STRIDE = 10;

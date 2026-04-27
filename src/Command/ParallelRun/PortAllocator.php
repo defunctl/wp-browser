@@ -4,6 +4,9 @@ namespace lucatume\WPBrowser\Command\ParallelRun;
 
 use RuntimeException;
 
+/**
+ * @internal
+ */
 final class PortAllocator
 {
     public const MAX_PORT = 65535;

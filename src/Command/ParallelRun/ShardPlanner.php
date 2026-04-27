@@ -2,6 +2,9 @@
 
 namespace lucatume\WPBrowser\Command\ParallelRun;
 
+/**
+ * @internal
+ */
 final class ShardPlanner
 {
     public const MODE_SHARD   = 'shard';
