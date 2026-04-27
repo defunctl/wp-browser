@@ -27,7 +27,6 @@ use lucatume\WPBrowser\Utils\Random;
 use lucatume\WPBrowser\WordPress\Assert as WPAssert;
 use lucatume\WPBrowser\WordPress\Database\MysqlDatabase;
 use lucatume\WPBrowser\WordPress\Database\SQLiteDatabase;
-use lucatume\WPBrowser\WordPress\Installation;
 use lucatume\WPBrowser\WordPress\InstallationException;
 use lucatume\WPBrowser\WordPress\InstallationState\InstallationStateInterface;
 use lucatume\WPBrowser\WordPress\InstallationState\Scaffolded;
@@ -668,10 +667,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_backup_globals_is_not_a_boolean($notABoolean): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'backupGlobals' => $notABoolean,
         ];
 
@@ -707,10 +705,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_backup_globals_exclude_list_is_not_an_array_of_strings($input): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'backupGlobalsExcludeList' => $input,
         ];
 
@@ -730,10 +727,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_backup_static_attributes_is_not_a_boolean($notABoolean): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'backupStaticAttributes' => $notABoolean,
         ];
 
@@ -769,10 +765,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_backup_static_attributes_exclude_list_is_not_in_the_correct_format($input): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'backupStaticAttributesExcludeList' => $input,
         ];
 
@@ -791,10 +786,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_skip_install_is_not_a_boolean($input): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'skipInstall' => $input,
         ];
 
@@ -813,10 +807,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     public function should_throw_if_silently_activate_plugins_config_parameter_is_not_a_list_of_strings($input): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'silentlyActivatePlugins' => $input,
         ];
 
@@ -835,10 +828,9 @@ class WPLoaderConfigValidationTest extends \Codeception\Test\Unit
     ): void
     {
         $wpRootDir = Env::get('WORDPRESS_ROOT_DIR');
-        $db = (new Installation($wpRootDir))->getDb();
         $this->config = [
             'wpRootFolder' => $wpRootDir,
-            'dbUrl' => $db->getDbUrl(),
+            'dbUrl' => Env::get('WORDPRESS_DB_URL'),
             'plugins' => ['woocommerce/woocommerce.php', 'my-plugin/plugin.php'],
             'silentlyActivatePlugins' => ['foo-plugin/plugin.php', 'woocommerce/woocommerce.php'],
         ];
