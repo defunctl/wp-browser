@@ -10,6 +10,9 @@ use lucatume\WPBrowser\Process\Protocol\Parser;
 use lucatume\WPBrowser\Process\Protocol\Request;
 use lucatume\WPBrowser\Opis\Closure\SerializableClosure;
 
+/**
+ * @group fast
+ */
 class RequestTest extends Unit
 {
 

@@ -62,6 +62,11 @@ class_wp_sqlite_db="${root_dir}/includes/sqlite-database-integration/wp-includes
 sed -i.bak 's/\$property->setAccessible( true );/PHP_VERSION_ID < 80100 \&\& \$property->setAccessible( true );/g' "$class_wp_sqlite_db"
 sed -i.bak 's/\$property->setAccessible( false );/PHP_VERSION_ID < 80100 \&\& \$property->setAccessible( false );/g' "$class_wp_sqlite_db"
 
+# Guard the __get( 'allow_unsafe_unquoted_parameters' ) call so it is skipped on WordPress versions
+# (< 6.2) where wpdb does not declare the property. Without the guard, wpdb::__get falls through to
+# WP_SQLite_DB's own private copy and PHP fatals with "Cannot access private property".
+sed -i.bak 's|$wpdb_allow_unsafe_unquoted_parameters = $this->__get( '"'"'allow_unsafe_unquoted_parameters'"'"' );|$wpdb_allow_unsafe_unquoted_parameters = property_exists( '"'"'wpdb'"'"', '"'"'allow_unsafe_unquoted_parameters'"'"' ) ? $this->__get( '"'"'allow_unsafe_unquoted_parameters'"'"' ) : $this->allow_unsafe_unquoted_parameters;|' "$class_wp_sqlite_db"
+
 rm -f "${class_wp_sqlite_db}.bak"
 
 echo "Transformations complete!"

@@ -8,6 +8,7 @@ use Codeception\Lib\ModuleContainer;
 use Codeception\Test\Unit;
 use lucatume\WPBrowser\Module\WPLoader;
 use lucatume\WPBrowser\Tests\Traits\DatabaseAssertions;
+use lucatume\WPBrowser\Tests\Traits\FastScaffold;
 use lucatume\WPBrowser\Tests\Traits\LoopIsolation;
 use lucatume\WPBrowser\Tests\Traits\MainInstallationAccess;
 use lucatume\WPBrowser\Tests\Traits\TmpFilesCleanup;
@@ -28,6 +29,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
     use LoopIsolation;
     use TmpFilesCleanup;
     use MainInstallationAccess;
+    use FastScaffold;
 
     private ModuleContainer $mockModuleContainer;
     private array $config = [];
@@ -55,6 +57,8 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      * It should allow loading theme from arbitrary location
      *
      * @test
+     * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_theme_from_arbitrary_location(): void
     {
@@ -112,7 +116,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
             ]
         ]);
         $wpRootDir = $themeProjectDir . '/var/wordpress';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -248,6 +252,8 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
      * It should allow loading theme from arbitrary location in multisite
      *
      * @test
+     * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_theme_from_arbitrary_location_in_multisite(): void
     {
@@ -305,7 +311,7 @@ class WPLoaderArbitraryThemeLocationTest extends Unit
             ]
         ]);
         $wpRootDir = $themeProjectDir . '/var/wordpress';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -452,6 +458,7 @@ public function invalidThemeConfigurationDataProvider(): array
      *
      * @test
      * @dataProvider invalidThemeConfigurationDataProvider
+     * @group fast
      */
     public function should_throw_if_theme_parameter_configured_with_not_an_array_of_two_strings($theme): void
     {
@@ -472,6 +479,8 @@ public function invalidThemeConfigurationDataProvider(): array
      * It should allow loading parent and child theme from arbitrary paths
      *
      * @test
+     * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths(): void
     {
@@ -531,7 +540,7 @@ public function invalidThemeConfigurationDataProvider(): array
         ]);
         $wpRootDir = $childThemeDir . '/var/wordpress';
         $parentThemeDir = $childThemeDir . '/vendor/acme/parent-theme';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');
@@ -613,6 +622,8 @@ public function invalidThemeConfigurationDataProvider(): array
      * It should allow loading parent and child theme from arbitrary paths in multisite
      *
      * @test
+     * @group slow
+     * @group requires-mysql-server
      */
     public function should_allow_loading_parent_and_child_theme_from_arbitrary_paths_in_multisite(): void
     {
@@ -672,7 +683,7 @@ public function invalidThemeConfigurationDataProvider(): array
         ]);
         $wpRootDir = $childThemeDir . '/var/wordpress';
         $parentThemeDir = $childThemeDir . '/vendor/acme/parent-theme';
-        Installation::scaffold($wpRootDir, '6.1.1');
+        $this->fastScaffold($wpRootDir, '6.1.1');
         $dbName = Random::dbName();
         $dbHost = Env::get('WORDPRESS_DB_HOST');
         $dbUser = Env::get('WORDPRESS_DB_USER');

@@ -71,6 +71,7 @@ class PhpBuiltInServerTest extends Unit
      * It should throw if document root does not exist
      *
      * @test
+     * @group fast
      */
     public function should_throw_if_document_root_does_not_exist(): void
     {
@@ -94,6 +95,7 @@ class PhpBuiltInServerTest extends Unit
      *
      * @test
      * @dataProvider notAssociativeArrayProvider
+     * @group fast
      */
     public function should_throw_if_env_is_not_associative_array(mixed $env): void
     {
@@ -143,6 +145,7 @@ class PhpBuiltInServerTest extends Unit
      * It should throw if specified port already in use
      *
      * @test
+     * @group requires-server
      */
     public function should_throw_if_specified_port_already_in_use(): void
     {

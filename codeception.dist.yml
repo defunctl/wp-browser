@@ -43,6 +43,7 @@ extensions:
     commands:
         - "lucatume\\WPBrowser\\Command\\RunOriginal"
         - "lucatume\\WPBrowser\\Command\\RunAll"
+        - "lucatume\\WPBrowser\\Command\\ParallelRun"
         - "lucatume\\WPBrowser\\Command\\GenerateWPAjax"
         - "lucatume\\WPBrowser\\Command\\GenerateWPCanonical"
         - "lucatume\\WPBrowser\\Command\\GenerateWPRestApi"

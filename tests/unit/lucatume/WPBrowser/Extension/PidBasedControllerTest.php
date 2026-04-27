@@ -7,6 +7,9 @@ use lucatume\WPBrowser\Extension\PidBasedController;
 use lucatume\WPBrowser\Exceptions\RuntimeException;
 use Symfony\Component\Process\Process;
 
+/**
+ * @group fast
+ */
 class PidBasedControllerTest extends \Codeception\Test\Unit
 {
     public function test_isProcessRunning_on_posix():void{
