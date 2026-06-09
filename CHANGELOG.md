@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - `wp:db:export` from a SQLite installation no longer produces a non-importable dump: values are hex-encoded instead of a `char(10)` concatenation chain that overflowed SQLite's expression-depth limit on values with many newlines (#802).
+- The installer no longer fatals when setting up WordPress 7.0: `FileRequest` binds the `$menu`, `$submenu` and `$compat` admin-menu globals to the global scope before loading the target file, so WordPress 7.0's admin bootstrap does not run `uksort()` on a null `$menu` (#804).
 
 ### Breaking change
 
