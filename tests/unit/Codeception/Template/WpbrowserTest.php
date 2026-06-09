@@ -44,6 +44,15 @@ EOT;
 
     private function replaceRandomPorts(array $expected, array $actual, string $file): array
     {
+        // symfony/yaml 6/7 dump an empty inline map as `{  }`, symfony/yaml 8 (PHP 8.4+) as `{}`;
+        // normalize both so the scaffolded codeception.yml snapshots match across versions.
+        $normalizeEmptyMaps = static fn(array $lines): array => array_map(
+            static fn(string $line): string => (string)preg_replace('/\{ +\}/', '{}', $line),
+            $lines
+        );
+        $expected = $normalizeEmptyMaps($expected);
+        $actual = $normalizeEmptyMaps($actual);
+
         if (!str_ends_with($file, 'tests/.env')) {
             return [$expected, $actual];
         }
