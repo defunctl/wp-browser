@@ -75,10 +75,13 @@ class PidBasedControllerTest extends \Codeception\Test\Unit
         };
         $hash = md5(microtime());
         $pidFile = sys_get_temp_dir()."/test-{$hash}.pid";
-        $process = new Process(['echo', '23']);
+        // A short-lived process like `echo` can exit before getPid() reads its PID, leaving $pid
+        // null. Use a long-running process so the PID is captured reliably, then stop it so the
+        // PID refers to a process that is no longer running.
+        $process = new Process(['sleep', '30']);
         $process->start();
         $pid = $process->getPid();
-        $process->wait();
+        $process->stop(0);
         if(!file_put_contents($pidFile,$pid)){
             $this->fail('Could not write pid to file '.$pidFile);
         }
