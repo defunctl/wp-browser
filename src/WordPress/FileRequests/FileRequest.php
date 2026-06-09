@@ -158,6 +158,16 @@ abstract class FileRequest
             $preLoadClosure($this->targetFile);
         }
 
+        // The target file is required in this method scope, not the global one. WordPress'
+        // `wp-admin/menu.php` builds `$menu`/`$submenu`/`$compat` in the including scope with no
+        // `global` declaration, while `wp-admin/includes/menu.php` (as of WP 7.0) declares them
+        // `global` before `uksort($menu, ...)`. Without binding them to the global scope here, that
+        // rebind hits a null global and fatals on PHP 8. Only these three are bound on purpose:
+        // the menu builder's `$_wp_*_nopriv` bookkeeping must stay scoped to this require so
+        // `user_can_access_admin_page()` keeps reading empty globals and does not deny the request
+        // (the current user is set after load, not during it).
+        global $menu, $submenu, $compat;
+
         require $this->targetFile;
 
         $returnValues = [];
