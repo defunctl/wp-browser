@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [unreleased] Unreleased
 
+## [4.6.0] 2026-06-09;
+
 ### Changed
 
 - Replace the bundled `lucatume\WPBrowser\Opis\Closure\*` library with `lucatume\WPBrowser\Utils\Packer` and `lucatume\WPBrowser\Utils\PackedClosure` for closure serialization in the IPC pipeline.
@@ -3304,4 +3306,5 @@ Read the [migration guide here](https://wpbrowser.wptestkit.dev/migration/from-v
 [4.5.13]: https://github.com/lucatume/wp-browser/compare/4.5.12...4.5.13
 [4.5.14]: https://github.com/lucatume/wp-browser/compare/4.5.13...4.5.14
 [4.5.15]: https://github.com/lucatume/wp-browser/compare/4.5.14...4.5.15
-[unreleased]: https://github.com/lucatume/wp-browser/compare/4.5.15...HEAD
+[4.6.0]: https://github.com/lucatume/wp-browser/compare/4.5.15...4.6.0
+[unreleased]: https://github.com/lucatume/wp-browser/compare/4.6.0...HEAD
