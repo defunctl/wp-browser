@@ -22,6 +22,12 @@ To run tests use the `vendor/bin/codecept run` binary.
 Run a suite of tests using `vendor/bin/codecept run <suite>`, e.g., `vendor/bin/codecept run unit`.
 Run a single test file or directory using its path relative to the project root directory, e.g., `vendor/bin/codecept run tests/unit/SomeTest.php` or `vendor/bin/codecept run tests/unit/SomeDirectory`
 
+Before claiming a fix or feature is done, run the suite that covers it and show the actual output. Never state a test passes without having run it in this session. For a bugfix, reproduce the failure first, apply the fix, then re-run and confirm green.
+
+The unit suite needs the `uopz` extension enabled; without it the tests using `src/Traits/UopzFunctions.php` error with `Call to undefined function uopz_set_return()`. Toggle extensions before running tests: `uon`/`uoff` enable/disable uopz, `xon`/`xoff` enable/disable Xdebug. Run `uon` before the unit suite.
+
+Run a suite split across N workers with `vendor/bin/codecept parallel-run <suite> --workers=<N>`, e.g. `vendor/bin/codecept parallel-run unit --workers=10`. Workers re-exec `vendor/bin/codecept` through its `#!/usr/bin/env php` shebang, so they inherit whatever the active CLI php has loaded, not a parent `-d extension=uopz`; `uon` must be active for them too.
+
 
 ### Code quality tools
 
@@ -49,6 +55,12 @@ Any one of the scripts above can be provided arguments using the `-- ...` syntax
 * run `stan` on a file - `composer stan -- file`
 * run `typos` on a file - `composer typos -- file`
 * run `typos` on a directory - `composer typos -- directory`
+
+## Changelog
+Any change that affects behavior, the public API, builds or releases must be recorded in `CHANGELOG.md` under the `## [unreleased] Unreleased` section, before you consider the task done. Use the existing `### Added/Changed/Fixed/Removed/Breaking change` subheads and reference the PR or issue, e.g. `(#804)`. Do not wait to be asked.
+
+## When you cannot reproduce a bug
+If you cannot reproduce a reported bug after a few honest attempts, stop. Report what you ruled out and two or three hypotheses for next steps instead of investigating indefinitely. A handoff beats a burned session.
 
 ## Commenting
 Where possible, adding comments should be avoided. The audience of this codebase are skiled developers ang comments should be far and few only where a piece of code is really cryptic.

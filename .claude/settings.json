@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit:*)",
+            "command": "git diff --cached --name-only --diff-filter=ACM | grep -q '[.]php$' || exit 0; php -r 'exit(function_exists(\"uopz_set_return\")?0:1);' || { echo 'Pre-commit: uopz is disabled — run `uon`, then commit (the unit suite needs it).' >&2; exit 2; }; vendor/bin/codecept parallel-run unit --workers=10 || { echo 'Pre-commit: unit suite failed; fix before committing.' >&2; exit 2; }",
+            "timeout": 600,
+            "statusMessage": "Pre-commit: unit suite (parallel-run, 10 workers, when PHP staged)"
+          }
+        ]
+      }
+    ]
+  }
+}
