@@ -241,6 +241,40 @@ class SqliteDatabaseTest extends \Codeception\Test\Unit
     }
 
     /**
+     * It should preserve values containing NUL bytes when dumping
+     *
+     * @test
+     * @group fast
+     */
+    public function should_preserve_nul_bytes_in_values_when_dumping(): void
+    {
+        $dir = FS::tmpDir('sqlite_');
+        $db = new SQLiteDatabase($dir, 'db.sqlite');
+        $db->create();
+        $db->query(
+            'CREATE TABLE wp_options (option_id INTEGER PRIMARY KEY, option_name TEXT NOT NULL,'
+            . ' option_value TEXT NOT NULL, autoload TEXT NOT NULL)'
+        );
+        // PHP serializes protected/private properties with NUL bytes (e.g. "\0*\0name"); the SQLite3
+        // extension truncates TEXT at the first NUL on read, so the dump must not lose the remainder.
+        $value = 'before' . "\0" . 'after-the-nul-must-survive';
+        $db->query(
+            'INSERT INTO wp_options (option_name, option_value, autoload) VALUES (:name, :value, :autoload)',
+            [':name' => 'with_nul', ':value' => $value, ':autoload' => 'yes']
+        );
+
+        $dumpFile = $dir . '/dump.sql';
+        $db->dump($dumpFile);
+
+        $restoreDir = FS::tmpDir('sqlite_');
+        $restored = new SQLiteDatabase($restoreDir, 'db.sqlite');
+        $restored->create();
+        $restored->import($dumpFile);
+
+        $this->assertSame($value, $restored->getOption('with_nul'));
+    }
+
+    /**
      * It should throw if trying to import from non-existing file
      *
      * @test
