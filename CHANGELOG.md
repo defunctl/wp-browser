@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [unreleased] Unreleased
 
+### Fixed
+
+- `wp:db:export` from a SQLite installation no longer truncates values containing NUL bytes (e.g. serialized objects with protected/private properties): table rows are read with each column cast to `BLOB` so the `SQLite3` extension does not stop at the first NUL byte, and the full value is hex-encoded into the dump.
+
 ## [4.6.0] 2026-06-09;
 
 ### Changed
