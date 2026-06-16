@@ -272,7 +272,25 @@ class SQLiteDatabase implements DatabaseInterface
             }
 
             $sql .= "DROP TABLE IF EXISTS $table[0];\n" . $tableSql . ";\n\n";
-            $rows = $db->query("SELECT * FROM $table[0]");
+
+            $columns = $db->query("PRAGMA table_info($table[0])");
+
+            if ($columns === false) {
+                throw new DbException("Could not read columns from table $table[0].", DbException::FAILED_DUMP);
+            }
+
+            $fieldNames = [];
+            $selectColumns = [];
+
+            while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
+                $fieldNames[] = "'" . $column["name"] . "'";
+                // Read each column CAST to BLOB: the SQLite3 extension truncates TEXT values at the
+                // first NUL byte on fetch, corrupting serialized data (e.g. objects with protected
+                // properties). BLOB values are returned binary-safe and quoteValue() hex-encodes them.
+                $selectColumns[] = 'CAST("' . $column["name"] . '" AS BLOB) AS "' . $column["name"] . '"';
+            }
+
+            $rows = $db->query("SELECT " . implode(",", $selectColumns) . " FROM $table[0]");
 
             if ($rows === false) {
                 throw new DbException("Could not read rows from table $table[0].", DbException::FAILED_DUMP);
@@ -284,20 +302,7 @@ class SQLiteDatabase implements DatabaseInterface
                 continue;
             }
 
-            $sql .= "INSERT INTO {$table[0]} (";
-            $columns = $db->query("PRAGMA table_info($table[0])");
-
-            if ($columns === false) {
-                throw new DbException("Could not read columns from table $table[0].", DbException::FAILED_DUMP);
-            }
-
-            $fieldNames = [];
-
-            while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
-                $fieldNames[] = "'" . $column["name"] . "'";
-            }
-
-            $sql .= implode(",", $fieldNames) . ") VALUES";
+            $sql .= "INSERT INTO {$table[0]} (" . implode(",", $fieldNames) . ") VALUES";
 
             do {
                 $values = [];
