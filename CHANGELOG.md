@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [unreleased] Unreleased
 
+### Fixed
+
+- `WPLoader` no longer tries to run the WordPress Core PHPUnit bootstrap more than once in the same PHP process when multiple suites use matching WPLoader bootstrap configuration.
+
 ## [4.6.1] 2026-06-16;
 
 ### Fixed

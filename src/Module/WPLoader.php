@@ -179,6 +179,10 @@ class WPLoader extends Module
     private ?DatabaseInterface $db = null;
     private ?CodeExecutionFactory $codeExecutionFactory = null;
     private bool $didLoadWordPress = false;
+    /**
+     * @var array<string,mixed>|null
+     */
+    private static ?array $loadedWordPressConfig = null;
 
     public function _getBootstrapOutput(): string
     {
@@ -624,6 +628,22 @@ class WPLoader extends Module
         /** @var array{loadOnly: bool} $config */
         $loadOnly = $loadOnly ?? $config['loadOnly'];
 
+        if (self::$loadedWordPressConfig !== null) {
+            $processConfig = $this->processWordPressBootstrapConfig($loadOnly);
+            if ($processConfig !== self::$loadedWordPressConfig) {
+                throw new ModuleConfigException(
+                    $this,
+                    'The WPLoader module cannot load WordPress more than once in the same PHP process ' .
+                    'with different bootstrap configuration. Run the suites in separate processes or make ' .
+                    'their WPLoader configuration match.'
+                );
+            }
+
+            $this->reuseLoadedWordPress($loadOnly);
+
+            return;
+        }
+
         $this->loadConfigFiles();
 
         if ($loadOnly) {
@@ -638,6 +658,7 @@ class WPLoader extends Module
         }
 
         $this->didLoadWordPress = true;
+        self::$loadedWordPressConfig = $this->processWordPressBootstrapConfig($loadOnly);
 
         wp_cache_flush();
 
@@ -865,6 +886,99 @@ class WPLoader extends Module
                 $action();
             }
         }
+    }
+
+    /**
+     * Returns the subset of WPLoader configuration that cannot be changed after WordPress has bootstrapped.
+     *
+     * @return array<string,mixed>
+     */
+    private function processWordPressBootstrapConfig(bool $loadOnly): array
+    {
+        $config = $this->config;
+        $db = $this->db;
+
+        return [
+            'loadOnly' => $loadOnly,
+            'wpRootFolder' => $this->installation->getWpRootDir(),
+            'dbUrl' => $db !== null ? $db->getDbUrl() : null,
+            'dbCharset' => $config['dbCharset'] ?? 'utf8',
+            'dbCollate' => $config['dbCollate'] ?? '',
+            'tablePrefix' => $config['tablePrefix'],
+            'domain' => $config['domain'],
+            'adminEmail' => $config['adminEmail'],
+            'title' => $config['title'],
+            'phpBinary' => $config['phpBinary'],
+            'language' => $config['language'],
+            'configFile' => $this->normalizeConfigFiles($config['configFile']),
+            'multisite' => $config['multisite'],
+            'pluginsFolder' => $config['pluginsFolder'],
+            'plugins' => $config['plugins'],
+            'silentlyActivatePlugins' => $config['silentlyActivatePlugins'],
+            'theme' => $config['theme'],
+            'AUTOMATIC_UPDATER_DISABLED' => $config['AUTOMATIC_UPDATER_DISABLED'],
+            'WP_HTTP_BLOCK_EXTERNAL' => $config['WP_HTTP_BLOCK_EXTERNAL'],
+            'WP_CONTENT_DIR' => $config['WP_CONTENT_DIR'] ?? null,
+            'WP_PLUGIN_DIR' => $config['WP_PLUGIN_DIR'] ?? null,
+            'WPMU_PLUGIN_DIR' => $config['WPMU_PLUGIN_DIR'] ?? null,
+            'dump' => $this->normalizeConfigList($config['dump']),
+            'skipInstall' => $config['skipInstall'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<int,mixed>
+     */
+    private function normalizeConfigList(mixed $value): array
+    {
+        return array_values(array_filter((array)$value));
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function normalizeConfigFiles(mixed $value): array
+    {
+        return array_map(static function ($file) {
+            $realpath = FS::realpath((string)$file);
+
+            return $realpath !== false ? $realpath : (string)$file;
+        }, $this->normalizeConfigList($value));
+    }
+
+    /**
+     * Marks this module instance as loaded when WordPress was already bootstrapped in this PHP process.
+     */
+    private function reuseLoadedWordPress(bool $loadOnly): void
+    {
+        $this->didLoadWordPress = true;
+        WPTestCase::beStrictAboutWpdbConnectionId($this->config['beStrictAboutWpdbConnectionId'] ?? true);
+        $this->syncWpdbConnectionId();
+        wp_cache_flush();
+        $this->factoryStore = new FactoryStore();
+
+        if ($loadOnly) {
+            Dispatcher::dispatch(self::EVENT_AFTER_LOADONLY, $this);
+        } else {
+            Dispatcher::dispatch(self::EVENT_AFTER_BOOTSTRAP, $this);
+        }
+
+        $this->runBootstrapActions();
+    }
+
+    private function syncWpdbConnectionId(): void
+    {
+        if (!isset($GLOBALS['wpdb'])) {
+            return;
+        }
+
+        if ($GLOBALS['wpdb'] instanceof \WP_SQLite_DB) {
+            WPTestCase::beStrictAboutWpdbConnectionId(false);
+
+            return;
+        }
+
+        WPTestCase::setWpdbConnectionId((string)$GLOBALS['wpdb']->get_var('SELECT CONNECTION_ID()'));
     }
 
     /**

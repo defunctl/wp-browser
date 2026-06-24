@@ -214,6 +214,137 @@ class WPLoaderBootstrapTest extends \Codeception\Test\Unit
 
 
     /**
+     * It should not bootstrap WordPress twice in the same PHP process with matching config
+     *
+     * @test
+     * @group slow
+     */
+    public function should_not_bootstrap_wordpress_twice_in_the_same_php_process_with_matching_config(): void
+    {
+        $wpRootDir = FS::tmpDir('wploader_');
+        $dbName = Random::dbName();
+        $dbHost = Env::get('WORDPRESS_DB_HOST');
+        $dbUser = Env::get('WORDPRESS_DB_USER');
+        $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
+        $this->config = [
+            'wpRootFolder' => $wpRootDir,
+            'dbName' => $dbName,
+            'dbHost' => $dbHost,
+            'dbUser' => $dbUser,
+            'dbPassword' => $dbPassword,
+            'domain' => 'wordpress.test',
+        ];
+        $this->fastScaffold($wpRootDir, 'latest');
+
+        $firstWpLoader = $this->module();
+        $secondWpLoader = $this->module();
+
+        $this->assertInIsolation(static function () use ($firstWpLoader, $secondWpLoader, $wpRootDir) {
+            $firstWpLoader->_initialize();
+
+            Assert::assertTrue($firstWpLoader->_didLoadWordPress());
+            Assert::assertEquals($wpRootDir . '/', ABSPATH);
+            Assert::assertInstanceOf(FactoryStore::class, $firstWpLoader->factory());
+
+            $secondWpLoader->_initialize();
+
+            Assert::assertTrue($secondWpLoader->_didLoadWordPress());
+            Assert::assertEquals($wpRootDir . '/', ABSPATH);
+            Assert::assertInstanceOf(FactoryStore::class, $secondWpLoader->factory());
+        });
+    }
+
+
+    /**
+     * It should throw when WordPress was already bootstrapped in the process with different config
+     *
+     * @test
+     * @group slow
+     */
+    public function should_throw_when_wordpress_was_already_bootstrapped_in_the_process_with_different_config(): void
+    {
+        $wpRootDir = FS::tmpDir('wploader_');
+        $dbName = Random::dbName();
+        $dbHost = Env::get('WORDPRESS_DB_HOST');
+        $dbUser = Env::get('WORDPRESS_DB_USER');
+        $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
+        $this->config = [
+            'wpRootFolder' => $wpRootDir,
+            'dbName' => $dbName,
+            'dbHost' => $dbHost,
+            'dbUser' => $dbUser,
+            'dbPassword' => $dbPassword,
+            'domain' => 'wordpress.test',
+        ];
+        $this->fastScaffold($wpRootDir, 'latest');
+
+        $firstWpLoader = $this->module();
+        $secondWpLoader = $this->module([], array_merge(
+            $this->config,
+            ['tablePrefix' => 'different_']
+        ));
+
+        $this->expectException(ModuleConfigException::class);
+        $this->expectExceptionMessage('cannot load WordPress more than once in the same PHP process');
+
+        $this->assertInIsolation(static function () use ($firstWpLoader, $secondWpLoader) {
+            $firstWpLoader->_initialize();
+            $secondWpLoader->_initialize();
+        });
+    }
+
+
+    /**
+     * It should not load a different config file after WordPress was already bootstrapped
+     *
+     * @test
+     * @group slow
+     */
+    public function should_not_load_different_config_file_after_wordpress_was_already_bootstrapped(): void
+    {
+        $wpRootDir = FS::tmpDir('wploader_');
+        $dbName = Random::dbName();
+        $dbHost = Env::get('WORDPRESS_DB_HOST');
+        $dbUser = Env::get('WORDPRESS_DB_USER');
+        $dbPassword = Env::get('WORDPRESS_DB_PASSWORD');
+        $this->config = [
+            'wpRootFolder' => $wpRootDir,
+            'dbName' => $dbName,
+            'dbHost' => $dbHost,
+            'dbUser' => $dbUser,
+            'dbPassword' => $dbPassword,
+            'domain' => 'wordpress.test',
+        ];
+        $this->fastScaffold($wpRootDir, 'latest');
+        $configDir = FS::tmpDir('wploader-config_');
+        $configFile = $configDir . '/config.php';
+        file_put_contents($configFile, '<?php putenv("LOADED_2=1");');
+
+        $firstWpLoader = $this->module();
+        $secondWpLoader = $this->module([], array_merge(
+            $this->config,
+            ['configFile' => $configFile]
+        ));
+
+        $this->expectException(ModuleConfigException::class);
+        $this->expectExceptionMessage('cannot load WordPress more than once in the same PHP process');
+
+        $this->assertInIsolation(static function () use ($firstWpLoader, $secondWpLoader) {
+            putenv('LOADED_2');
+            $firstWpLoader->_initialize();
+
+            try {
+                $secondWpLoader->_initialize();
+            } catch (ModuleConfigException $e) {
+                Assert::assertFalse(getenv('LOADED_2'));
+
+                throw $e;
+            }
+        });
+    }
+
+
+    /**
      * It should install and bootstrap multisite installation
      *
      * @test

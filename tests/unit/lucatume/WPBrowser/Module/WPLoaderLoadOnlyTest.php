@@ -48,6 +48,52 @@ class WPLoaderLoadOnlyTest extends Unit
         });
     }
 
+    public function testWillReuseAlreadyLoadedWordPressInBeforeSuiteWhenLoadOnlyIsTrue(): void
+    {
+        [$wpRootFolder, $dbUrl] = $this->makeMockConfiguredInstallation();
+        file_put_contents(
+            $wpRootFolder . '/wp-load.php',
+            '<?php putenv("WP_LOAD_COUNT=" . (((int) getenv("WP_LOAD_COUNT")) + 1)); do_action("wp_loaded");'
+        );
+        $firstModuleContainer = new ModuleContainer(new Di(), []);
+        $firstModule = new WPLoader($firstModuleContainer, [
+            'dbUrl' => $dbUrl,
+            'wpRootFolder' => $wpRootFolder,
+            'loadOnly' => true,
+        ]);
+        $secondModuleContainer = new ModuleContainer(new Di(), []);
+        $secondModule = new WPLoader($secondModuleContainer, [
+            'dbUrl' => $dbUrl,
+            'wpRootFolder' => $wpRootFolder,
+            'loadOnly' => true,
+        ]);
+
+        Fork::executeClosure(function () use ($firstModule, $secondModule) {
+            // WordPress' functions are stubbed by wordpress-stubs in unit tests: override them to do something.
+            $did_actions = [];
+            uopz_set_return('do_action', static function ($action) use (&$did_actions) {
+                $did_actions[$action] = true;
+            }, true);
+            uopz_set_return('did_action', static function ($action) use (&$did_actions) {
+                return isset($did_actions[$action]);
+            }, true);
+
+            $firstModule->_initialize();
+            $this->assertFalse($firstModule->_didLoadWordPress());
+
+            $firstModule->_beforeSuite();
+            $this->assertTrue($firstModule->_didLoadWordPress());
+            $this->assertSame('1', getenv('WP_LOAD_COUNT'));
+
+            $secondModule->_initialize();
+            $this->assertFalse($secondModule->_didLoadWordPress());
+
+            $secondModule->_beforeSuite();
+            $this->assertTrue($secondModule->_didLoadWordPress());
+            $this->assertSame('1', getenv('WP_LOAD_COUNT'));
+        });
+    }
+
     public function testWillLoadWordPressInInitializeWhenLoadOnlyIsFalse(): void
     {
         [$wpRootFolder, $dbUrl] = $this->makeMockConfiguredInstallation();
